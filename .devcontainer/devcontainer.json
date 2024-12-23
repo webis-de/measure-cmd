@@ -1,0 +1,80 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+	"name": "Existing Dockerfile",
+	"build": {
+		// Sets the run context to one level up instead of the .devcontainer folder.
+		"context": "..",
+		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+		"dockerfile": "./Dockerfile.dev"
+	},
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Uncomment the next line to run commands after the container is created.
+	// "postCreateCommand": "cat /etc/os-release",
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack",
+				"jbenden.c-cpp-flylint",
+				"ms-vscode.live-server",
+				"cschlosser.doxdocgen"
+			],
+			"settings": {
+				"editor.rulers": [
+					120
+				],
+				"C_Cpp.autoAddFileAssociations": false,
+				"files.exclude": {
+					"build": true
+				},
+				"editor.formatOnSave": true,
+				"C_Cpp.codeAnalysis.clangTidy.enabled": true,
+				"C_Cpp.codeAnalysis.clangTidy.args": [
+					"-p ${workspaceFolder}/build/compile_commands.json"
+				],
+				"launch": {
+					"version": "0.2.0",
+					"configurations": [
+						{
+							"name": "(gdb) measurecmd -vvv \"echo hello world\"",
+							"type": "cppdbg",
+							"request": "launch",
+							// Resolved by CMake Tools:
+							"program": "${command:cmake.launchTargetPath}",
+							"args": [
+								"-vvv",
+								"echo hello world"
+							],
+							"stopAtEntry": false,
+							"cwd": "${workspaceFolder}",
+							"environment": [
+								{
+									// add the directory where our target was built to the PATHs
+									// it gets resolved by CMake Tools:
+									"name": "PATH",
+									"value": "$PATH:${command:cmake.launchTargetDirectory}"
+								}
+							],
+							/* "externalConsole": true, */
+							"MIMode": "gdb",
+							"setupCommands": [
+								{
+									"description": "Enable pretty-printing for gdb",
+									"text": "-enable-pretty-printing",
+									"ignoreFailures": true
+								}
+							]
+						}
+					],
+					"compounds": []
+				}
+			}
+		}
+	},
+	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "ubuntu"
+}

@@ -1,0 +1,26 @@
+FROM ubuntu:24.04
+
+
+########################################################################################################################
+# Install Dependencies                                                                                                 #
+########################################################################################################################
+USER root
+RUN <<EOF
+apt-get update
+apt-get -y install g++-13 cmake git
+
+# Needed for the dev environment
+apt-get -y install build-essential cppcheck flawfinder doxygen graphviz gdb clang-tidy clang-format
+
+# Dependencies (libssl-dev needed for libgit)
+apt-get -y install libssl-dev
+EOF
+
+########################################################################################################################
+# Create User                                                                                                          #
+########################################################################################################################
+# Change root Password to 1234
+RUN echo 'root:1234' | chpasswd
+# Create new user: "dev"
+RUN useradd -ms /bin/bash dev
+USER dev
