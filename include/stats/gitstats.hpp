@@ -22,7 +22,7 @@ namespace am {
 
 		void start() override;
 		void stop() override;
-		void getStats(std::map<std::string, std::string>& stats) override;
+		void getStats(Stats& stats) override;
 	};
 } // namespace am
 

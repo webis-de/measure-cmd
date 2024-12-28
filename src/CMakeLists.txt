@@ -4,7 +4,9 @@ enable_testing()
 add_executable(measurecmd)
 target_sources(measurecmd PRIVATE
 	main.cpp
+	jsonformatter.cpp
 	logging.cpp
+	simpleformatter.cpp
 	stats/energystats.cpp
 	stats/gitstats.cpp
 	stats/systemstats.cpp

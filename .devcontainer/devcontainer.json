@@ -40,13 +40,14 @@
 					"version": "0.2.0",
 					"configurations": [
 						{
-							"name": "(gdb) measurecmd -vvv \"echo hello world\"",
+							"name": "(gdb) measurecmd -vvv --format=json \"echo hello world\"",
 							"type": "cppdbg",
 							"request": "launch",
 							// Resolved by CMake Tools:
 							"program": "${command:cmake.launchTargetPath}",
 							"args": [
 								"-vvv",
+								"--format=json",
 								"echo hello world"
 							],
 							"stopAtEntry": false,

@@ -9,4 +9,4 @@ void EnergyStats::stop() {
 	tracker.stop();
 	tracker.calculate_energy();
 }
-void EnergyStats::getStats(std::map<std::string, std::string>& stats) { /** \todo implement **/ }
+void EnergyStats::getStats(Stats& stats) { /** \todo implement **/ }

@@ -12,10 +12,13 @@ using am::SystemStats;
  */
 unsigned getSystemRAM();
 
-void SystemStats::start() {}
-void SystemStats::stop() {}
-void SystemStats::getStats(std::map<std::string, std::string>& stats) {
-	stats["system/ram"] = std::format("{} MB", getSystemRAM());
+void SystemStats::start() { starttime = std::chrono::steady_clock::now(); }
+void SystemStats::stop() { stoptime = std::chrono::steady_clock::now(); }
+void SystemStats::getStats(Stats& stats) {
+	stats["system"] = Stat{Stats{{"ram", Stat{std::format("{} MB", getSystemRAM())}}}};
+	stats["elapsed time"] = Stat{
+			std::format("{} us", std::chrono::duration_cast<std::chrono::microseconds>(stoptime - starttime).count())
+	};
 }
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)

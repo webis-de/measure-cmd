@@ -1,4 +1,5 @@
 #include <logging.hpp>
+#include <statformatter.hpp>
 #include <stats/energystats.hpp>
 #include <stats/gitstats.hpp>
 #include <stats/systemstats.hpp>
@@ -36,6 +37,15 @@ struct LoggerConf final {
 struct MeasureCmdArgs {
 	LoggerConf logConf;
 	std::string command;
+	std::string formatter;
+
+	std::unique_ptr<StatFormatter> constructFormatter(const am::Stats& stats) const {
+		if (formatter == "simple")
+			return std::make_unique<SimpleFormatter>(stats);
+		else if (formatter == "json")
+			return std::make_unique<JsonFormatter>(stats);
+		abort();
+	}
 };
 
 void setupLoggerArgs(CLI::App& app, LoggerConf& conf) {
@@ -60,11 +70,12 @@ void runMeasureCmd(const MeasureCmdArgs& args) {
 	auto exticode = std::system(args.command.c_str());
 	for (auto& provider : providers | std::views::reverse)
 		provider->stop();
-	std::map<std::string, std::string> stats;
+	am::Stats stats;
 	for (auto& provider : providers)
 		provider->getStats(stats);
-	for (auto& [key, value] : stats)
-		logger->info("[{}] {}", key, value);
+
+	std::cout << "\n== RESULTS ==" << std::endl;
+	std::cout << *args.constructFormatter(std::move(stats));
 }
 
 int main(int argc, char* argv[]) {
@@ -76,6 +87,8 @@ int main(int argc, char* argv[]) {
 	MeasureCmdArgs measureArgs;
 	setupLoggerArgs(app, measureArgs.logConf);
 	app.add_option("command", measureArgs.command, "The command to measure resources for")->required();
+	app.add_option("--format,-f", measureArgs.formatter, "Specified how the output should be formatted")
+			->default_val("simple");
 
 	app.callback([&measureArgs]() { runMeasureCmd(measureArgs); });
 
