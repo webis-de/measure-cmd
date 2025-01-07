@@ -39,6 +39,7 @@ FetchContent_MakeAvailable(cppjoule)
 target_link_libraries(measurecmd CPP_Joules)
 
 # LibGit
+option(USE_HTTPS OFF)
 FetchContent_Declare(libgit GIT_REPOSITORY https://github.com/libgit2/libgit2.git GIT_TAG v1.8.4)
 FetchContent_MakeAvailable(libgit)
 target_link_libraries(measurecmd libgit2 libgit2package)
