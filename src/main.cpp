@@ -1,6 +1,7 @@
 #include <config.hpp>
 
 #include <cstdlib>
+#include <future>
 #include <iostream>
 #include <ranges>
 #include <thread>
@@ -8,29 +9,45 @@
 using am::MeasureCmdArgs;
 using am::setupLoggerArgs;
 
-void runMeasureCmd(const MeasureCmdArgs& args) {
+static void runCommand(std::promise<int> exitcode, std::string command) {
+	exitcode.set_value(std::system(command.c_str()));
+}
+
+static void runMeasureCmd(const MeasureCmdArgs& args) {
+	// Initialization and setup
 	am::setVerbosity(args.logConf.getVerbosity());
 	auto logger = am::getLogger("measure");
 	logger->info("Measuring command: {}", args.command);
-	if (args.monitor)
-		logger->debug("Monitoring is enabled, I will monitor once every {} ms", args.pollIntervallMs);
 
+	// Start measuring
 	auto providers = args.constructProviders();
 	for (auto& provider : providers)
 		provider->start();
-	volatile bool running = true;
-	std::thread pollthread{[&providers, &running, args] {
-		while (args.monitor && running) {
-			std::this_thread::sleep_for(std::chrono::milliseconds{args.pollIntervallMs});
+
+	// Run the command
+	std::promise<int> promise;
+	auto exitcodeFuture = promise.get_future();
+	std::thread cmdthread(runCommand, std::move(promise), args.command);
+
+	// Wait for the result (and continue monitoring if configured)
+	if (args.monitor) {
+		logger->debug("Monitoring is enabled, I will monitor once every {} ms", args.pollIntervallMs);
+		auto intervall = std::chrono::milliseconds{args.pollIntervallMs};
+		while (exitcodeFuture.wait_for(intervall) != std::future_status::ready) {
 			for (auto& provider : providers)
 				provider->step();
 		}
-	}};
-	auto exitcode = std::system(args.command.c_str());
-	running = false;
-	pollthread.join();
+	} else {
+		exitcodeFuture.wait();
+	}
+	cmdthread.join();
+	auto exitcode = exitcodeFuture.get();
+
+	// Stop measuring
 	for (auto& provider : providers | std::views::reverse)
 		provider->stop();
+
+	// Collect statistics and print them
 	am::Stats stats{{"exit code", {std::to_string(exitcode)}}};
 	for (auto& provider : providers)
 		provider->getStats(stats);

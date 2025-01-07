@@ -4,6 +4,7 @@
 #include "provider.hpp"
 
 #include <chrono>
+#include <vector>
 
 namespace am {
 	class SystemStats final : public StatsProvider {
@@ -11,10 +12,22 @@ namespace am {
 		std::chrono::steady_clock::time_point starttime;
 		std::chrono::steady_clock::time_point stoptime;
 
+		unsigned maxRAM;
+
+		struct Entry;
+		std::vector<Entry> monitored;
+
 	public:
 		void start() override;
 		void stop() override;
+		void step() override;
 		void getStats(Stats& stats) override;
+
+	private:
+		struct Entry {
+			int64_t timestamp;
+			unsigned usedRAM;
+		};
 	};
 } // namespace am
 
