@@ -3,6 +3,7 @@
 #include <git2.h>
 
 #include <iostream>
+#include <string>
 
 using am::GitStats;
 

@@ -4,11 +4,13 @@ enable_testing()
 add_executable(measurecmd)
 target_sources(measurecmd PRIVATE
 	main.cpp
+	config.cpp
 	jsonformatter.cpp
 	logging.cpp
 	simpleformatter.cpp
 	stats/energystats.cpp
 	stats/gitstats.cpp
+	stats/gpustats.cpp
 	stats/systemstats.cpp
 )
 target_compile_features(measurecmd PUBLIC cxx_std_23)

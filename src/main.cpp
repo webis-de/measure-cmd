@@ -1,76 +1,37 @@
-#include <logging.hpp>
-#include <statformatter.hpp>
-#include <stats/energystats.hpp>
-#include <stats/gitstats.hpp>
-#include <stats/systemstats.hpp>
-
-#include <CLI/CLI.hpp>
-#include <spdlog/spdlog.h>
+#include <config.hpp>
 
 #include <cstdlib>
 #include <iostream>
-#include <memory>
 #include <ranges>
 #include <thread>
-#include <vector>
 
-struct LoggerConf final {
-	bool quiet = false;
-	/**
-	 * @brief Sets the verbosity of the logger. Per default (verbosity=0) only critical, error and warnings are printed.
-	 * If verbosity is...
-	 *  - 1: info and above is printed
-	 *  - 2: debug and above is printed
-	 *  - 3+: trace and above is printed
-	 */
-	int verbosity = 0;
-
-	am::Verbosity getVerbosity() const noexcept {
-		if (quiet)
-			return am::Verbosity::Off;
-		auto verb = static_cast<int>(am::Verbosity::Warning) + verbosity;
-		verb = std::min(verb, static_cast<int>(am::Verbosity::Trace));
-		return static_cast<am::Verbosity>(verb);
-	}
-};
-
-struct MeasureCmdArgs {
-	LoggerConf logConf;
-	std::string command;
-	std::string formatter;
-
-	std::unique_ptr<StatFormatter> constructFormatter(const am::Stats& stats) const {
-		if (formatter == "simple")
-			return std::make_unique<SimpleFormatter>(stats);
-		else if (formatter == "json")
-			return std::make_unique<JsonFormatter>(stats);
-		abort();
-	}
-};
-
-void setupLoggerArgs(CLI::App& app, LoggerConf& conf) {
-	app.add_flag(
-			"-v,--verbose", conf.verbosity,
-			"Sets the logger's verbosity. Passing it multiple times increases verbosity."
-	);
-	app.add_flag("-q,--quiet", conf.quiet, "Supresses all outputs");
-}
+using am::MeasureCmdArgs;
+using am::setupLoggerArgs;
 
 void runMeasureCmd(const MeasureCmdArgs& args) {
 	am::setVerbosity(args.logConf.getVerbosity());
 	auto logger = am::getLogger("measure");
 	logger->info("Measuring command: {}", args.command);
-	std::vector<std::unique_ptr<am::StatsProvider>> providers;
-	/* Initializer list does not work here, since it uses the copy-constructor :( */
-	providers.push_back(std::make_unique<am::GitStats>());
-	providers.push_back(std::make_unique<am::SystemStats>());
-	providers.push_back(std::make_unique<am::EnergyStats>());
+	if (args.monitor)
+		logger->debug("Monitoring is enabled, I will monitor once every {} ms", args.pollIntervallMs);
+
+	auto providers = args.constructProviders();
 	for (auto& provider : providers)
 		provider->start();
-	auto exticode = std::system(args.command.c_str());
+	volatile bool running = true;
+	std::thread pollthread{[&providers, &running, args] {
+		while (args.monitor && running) {
+			std::this_thread::sleep_for(std::chrono::milliseconds{args.pollIntervallMs});
+			for (auto& provider : providers)
+				provider->step();
+		}
+	}};
+	auto exitcode = std::system(args.command.c_str());
+	running = false;
+	pollthread.join();
 	for (auto& provider : providers | std::views::reverse)
 		provider->stop();
-	am::Stats stats;
+	am::Stats stats{{"exit code", {std::to_string(exitcode)}}};
 	for (auto& provider : providers)
 		provider->getStats(stats);
 
@@ -83,12 +44,27 @@ int main(int argc, char* argv[]) {
 	CLI::App app("TODO");
 	auto versionString = std::format("TODO");
 	app.set_version_flag("-V,--version", versionString);
+	app.set_help_flag("-h,--help", "Prints this help message");
 
 	MeasureCmdArgs measureArgs;
 	setupLoggerArgs(app, measureArgs.logConf);
 	app.add_option("command", measureArgs.command, "The command to measure resources for")->required();
 	app.add_option("--format,-f", measureArgs.formatter, "Specified how the output should be formatted")
 			->default_val("simple");
+	app.add_option("--source,-s", measureArgs.statproviders, "The datasources to poll information from")
+			->default_val(std::vector<std::string>{"git", "system", "energy"});
+	app.add_flag("--monitor,!--no-monitor", measureArgs.monitor)
+			->description("If set, monitors resource consumption continuously at the intervall "
+						  "specified in --poll-intervall.")
+			->default_val(true);
+	app.add_option("--poll-intervall", measureArgs.pollIntervallMs)
+			->description(
+					"The intervall in milliseconds in which to poll for updated stats like energy consumption and RAM "
+					"usage. Smaller intervalls allow for higher accuracy."
+			)
+			->default_val(100);
+	app.add_flag("--pedantic", measureArgs.pedantic, "If set, measure will stop execution on errors")
+			->default_val(false); /** \todo support pedantic **/
 
 	app.callback([&measureArgs]() { runMeasureCmd(measureArgs); });
 

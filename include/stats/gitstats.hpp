@@ -4,8 +4,6 @@
 #include "../logging.hpp"
 #include "provider.hpp"
 
-#include <filesystem>
-
 struct git_repository;
 
 namespace am {
