@@ -7,16 +7,16 @@ using std::chrono::steady_clock;
 
 using am::SystemStats;
 
+struct SysInfo {
+	unsigned numCores;
+	uint64_t totalRamMB;
+};
+
 struct Utilization {
 	unsigned ramUsedKB;
 };
 
-/**
- * @brief Returns the total system RAM in Megabytes
- * 
- * @return The total system RAM in Megabytes.
- */
-unsigned getSystemRAM();
+SysInfo getSysInfo();
 
 Utilization getUtilization();
 
@@ -30,7 +30,10 @@ void SystemStats::step() {
 }
 
 void SystemStats::getStats(Stats& stats) {
-	stats["system"] = Stat{Stats{{"ram", Stat{std::format("{} MB", getSystemRAM())}}}};
+	auto info = getSysInfo();
+	stats["system"] = Stat{Stats{
+			{"num cores", Stat{std::to_string(info.numCores)}}, {"ram", Stat{std::format("{} MB", info.totalRamMB)}}
+	}};
 	stats["elapsed time"] = Stat{
 			std::format("{} ms", std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())
 	};
@@ -39,16 +42,27 @@ void SystemStats::getStats(Stats& stats) {
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #error "Unsupported System" /** \todo add support **/
+
+#include <windows.h>
+
+SysInfo getSysInfo() {
+	SYSTEM_INFO info;
+	GetSystemInfo(&info);
+	return { .numCores = info.dwNumberOfProcessors, .totalRamMB = /** \todo **/ }
+}
+
 #elif __APPLE__
 #error "Unsupported System" /** \todo add support **/
 #elif __linux__
 #include <sys/resource.h>
 #include <sys/sysinfo.h>
+#include <unistd.h>
 
-unsigned getSystemRAM() {
+SysInfo getSysInfo() {
 	struct sysinfo info;
 	sysinfo(&info);
-	return ((std::uint64_t)info.totalram * info.mem_unit) / 1000 / 1000;
+	return {.numCores = static_cast<unsigned>(sysconf(_SC_NPROCESSORS_ONLN)),
+			.totalRamMB = ((std::uint64_t)info.totalram * info.mem_unit) / 1000 / 1000};
 }
 
 Utilization getUtilization() {

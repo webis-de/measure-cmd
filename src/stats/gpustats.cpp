@@ -1,5 +1,7 @@
 #include <stats/gpustats.hpp>
 
+#include <nvml/nvml.h>
+
 using am::GPUStats;
 
 GPUStats::GPUStats() { /** \todo implement **/ }

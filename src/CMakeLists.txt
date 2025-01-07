@@ -34,7 +34,7 @@ FetchContent_MakeAvailable(cli11)
 target_link_libraries(measurecmd CLI11::CLI11)
 
 # CPPJoule
-FetchContent_Declare(cppjoule GIT_REPOSITORY https://github.com/rishalab/CPPJoules.git GIT_TAG v1.0)
+FetchContent_Declare(cppjoule GIT_REPOSITORY https://github.com/TheMrSheldon/CPPJoules.git GIT_TAG main)#GIT_TAG v1.0)
 FetchContent_MakeAvailable(cppjoule)
 target_link_libraries(measurecmd CPP_Joules)
 
@@ -42,3 +42,8 @@ target_link_libraries(measurecmd CPP_Joules)
 FetchContent_Declare(libgit GIT_REPOSITORY https://github.com/libgit2/libgit2.git GIT_TAG v1.8.4)
 FetchContent_MakeAvailable(libgit)
 target_link_libraries(measurecmd libgit2 libgit2package)
+
+# NVML (We load the go-nvml bindings since there does not seem to be a repo with just the header)
+FetchContent_Declare(nvml GIT_REPOSITORY https://github.com/NVIDIA/go-nvml.git GIT_TAG v0.12.4-0)
+FetchContent_MakeAvailable(nvml)
+target_include_directories(measurecmd PUBLIC ${nvml_SOURCE_DIR}/gen/)

@@ -3,7 +3,7 @@
 
 #include "provider.hpp"
 
-#include <cppJoules.h>
+#include <cppJoules.hpp>
 
 namespace am {
 	class EnergyStats final : public StatsProvider {
