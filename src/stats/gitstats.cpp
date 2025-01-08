@@ -8,9 +8,7 @@
 using am::GitStats;
 
 static std::string getLastCommitHash(git_repository* repo) {
-	git_revwalk* walk;
 	git_oid id;
-	git_commit* commit;
 	int err;
 	if (err = git_reference_name_to_id(&id, repo, "HEAD")) {
 		return ""; /** \todo log the error **/
