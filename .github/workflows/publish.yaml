@@ -29,7 +29,7 @@ jobs:
           files: ${{github.workspace}}/build/measure-0.0.1rc-Linux.deb
   linux-binary:
     name: Build Linux Binary
-    runs-on: ubuntu
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
