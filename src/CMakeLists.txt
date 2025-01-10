@@ -1,7 +1,8 @@
 include(FetchContent)
 enable_testing()
 
-add_library(measureapi
+# Must be shared since it should interface with other languages as well
+add_library(measureapi SHARED
 	measure_api.cpp
 	config.cpp
 	jsonformatter.cpp
@@ -14,6 +15,7 @@ add_library(measureapi
 )
 target_compile_features(measureapi PUBLIC cxx_std_20)
 target_include_directories(measureapi PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../include)
+set_property(TARGET measureapi PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable(measurecmd)
 target_sources(measurecmd PRIVATE
@@ -24,6 +26,7 @@ target_link_libraries(measurecmd measureapi)
 
 
 set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 ##########################################################################################
@@ -50,7 +53,8 @@ target_link_libraries(measureapi PRIVATE CPP_Joules)
 option(USE_HTTPS OFF)
 FetchContent_Declare(libgit GIT_REPOSITORY https://github.com/libgit2/libgit2.git GIT_TAG v1.8.4)
 FetchContent_MakeAvailable(libgit)
-set_property(TARGET libgit2 libgit2package PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET libgit2 PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET libgit2package PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(measureapi PUBLIC libgit2 libgit2package)
 
 # NVML (We load the go-nvml bindings since there does not seem to be a repo with just the header)
