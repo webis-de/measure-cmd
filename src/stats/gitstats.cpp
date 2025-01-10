@@ -15,7 +15,7 @@ static std::string getLastCommitHash(git_repository* repo) {
 	}
 	char buf[GIT_OID_SHA1_HEXSIZE + 1];
 	git_oid_tostr(buf, sizeof(buf), &id);
-	return std::string{std::begin(buf), std::end(buf)};
+	return std::string{buf};
 }
 
 static std::string getShortname(git_repository* repo) {
@@ -42,7 +42,7 @@ static std::string getRemoteOrigin(git_repository* repo) {
 
 GitStats::GitStats() : logger(getLogger("gitstats")), repo(nullptr) {
 	git_libgit2_init();
-	int error = git_repository_open(&repo, "./");
+	int error = git_repository_open_ext(&repo, "./", 0, nullptr);
 	if (error < 0) {
 		const git_error* e = git_error_last();
 		printf("Error %d/%d: %s\n", error, e->klass, e->message);

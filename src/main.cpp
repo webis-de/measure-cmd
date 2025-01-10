@@ -1,13 +1,24 @@
 #include <config.hpp>
 
+#include <CLI/CLI.hpp>
+
 #include <cstdlib>
 #include <future>
 #include <iostream>
 #include <ranges>
 #include <thread>
 
+#include <git2/version.h> /** \todo move into stats provider **/
+
 using am::MeasureCmdArgs;
-using am::setupLoggerArgs;
+
+static void setupLoggerArgs(CLI::App& app, am::LoggerConf& conf) {
+	app.add_flag(
+			"-v,--verbose", conf.verbosity,
+			"Sets the logger's verbosity. Passing it multiple times increases verbosity."
+	);
+	app.add_flag("-q,--quiet", conf.quiet, "Supresses all outputs");
+}
 
 static void runCommand(std::promise<int> exitcode, std::string command) {
 	exitcode.set_value(std::system(command.c_str()));
@@ -56,10 +67,24 @@ static void runMeasureCmd(const MeasureCmdArgs& args) {
 	std::cout << *args.constructFormatter(std::move(stats));
 }
 
+#if defined(__GNUC__)
+#if defined(__clang__)
+static constexpr std::string compiler = "clang " __VERSION__;
+#else
+static constexpr std::string compiler = "gcc " __VERSION__;
+#endif
+#elif defined(_MSC_VER)
+static constexpr std::string compiler = "msvc " _MSC_FULL_VER;
+#else
+static constexpr std::string compiler = "unknown compiler";
+#endif
+
 int main(int argc, char* argv[]) {
 	/** \todo add app description **/
 	CLI::App app("TODO");
-	auto versionString = std::format("TODO");
+	auto versionString = std::format(
+			"libgit v.{}\n{}\nBuilt with {} for C++ {}", LIBGIT2_VERSION, am::getVersionStr(), compiler, __cplusplus
+	);
 	app.set_version_flag("-V,--version", versionString);
 	app.set_help_flag("-h,--help", "Prints this help message");
 
@@ -71,8 +96,9 @@ int main(int argc, char* argv[]) {
 	app.add_option("--source,-s", measureArgs.statproviders, "The datasources to poll information from")
 			->default_val(std::vector<std::string>{"git", "system", "energy"});
 	app.add_flag("--monitor,!--no-monitor", measureArgs.monitor)
-			->description("If set, monitors resource consumption continuously at the intervall "
-						  "specified in --poll-intervall.")
+			->description(
+					"If set, monitors resource consumption continuously at the intervall specified in --poll-intervall."
+			)
 			->default_val(true);
 	app.add_option("--poll-intervall", measureArgs.pollIntervallMs)
 			->description(

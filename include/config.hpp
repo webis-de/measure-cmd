@@ -5,7 +5,6 @@
 #include "statformatter.hpp"
 #include "stats/provider.hpp"
 
-#include <CLI/CLI.hpp>
 #include <spdlog/spdlog.h>
 
 #include <memory>
@@ -45,14 +44,6 @@ namespace am {
 		std::unique_ptr<StatFormatter> constructFormatter(const am::Stats& stats) const;
 		std::vector<std::unique_ptr<am::StatsProvider>> constructProviders() const;
 	};
-
-	static void setupLoggerArgs(CLI::App& app, LoggerConf& conf) {
-		app.add_flag(
-				"-v,--verbose", conf.verbosity,
-				"Sets the logger's verbosity. Passing it multiple times increases verbosity."
-		);
-		app.add_flag("-q,--quiet", conf.quiet, "Supresses all outputs");
-	}
 } // namespace am
 
 #endif

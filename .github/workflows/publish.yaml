@@ -28,7 +28,7 @@ jobs:
         with:
           files: ${{github.workspace}}/build/measure-0.0.1rc-Linux.deb
   linux-binary:
-    name: Build Linux Binary
+    name: Build Linux Binaries
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -41,7 +41,11 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=gcc-13 -D CMAKE_CXX_COMPILER=g++-13 -DBUILD_SHARED_LIBS=NO -DMEASURECMD_BUILD_DOCS=NO -DMEASURECMD_BUILD_DEB=NO
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config Release --target measurecmd
-      - name: Release
+      - name: Release measurecmd
         uses: softprops/action-gh-release@v2
         with:
           files: ${{github.workspace}}/build/src/measurecmd
+      - name: Release measureapi
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{github.workspace}}/build/src/libmeasureapi.so
