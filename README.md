@@ -4,13 +4,13 @@
     <h3 align="center">Measuring what really matters</h3>
 </p>
 <p align="center">
-    <a><img alt="GPL 2.0 License" src="https://img.shields.io/github/license/webis-de/measure-cmd.svg" style="filter: none;"/></a>
-    <a><img alt="Current Release" src="https://img.shields.io/github/release/webis-de/measure-cmd.svg" style="filter: none;"/></a>
+    <a><img alt="GPL 2.0 License" src="https://img.shields.io/github/license/tira-io/measure.svg" style="filter: none;"/></a>
+    <a><img alt="Current Release" src="https://img.shields.io/github/release/tira-io/measure.svg" style="filter: none;"/></a>
     <br>
     <a href="#installation">Installation</a> &nbsp;|&nbsp;
     <a href="#command">Command</a> &nbsp;|&nbsp;
     <a href="#api">API</a> &nbsp;|&nbsp;
-    <a href="https://github.com/webis-de/measure-cmd/tree/main/examples">Examples</a> &nbsp;|&nbsp;
+    <a href="https://github.com/tira-io/measure/tree/main/examples">Examples</a> &nbsp;|&nbsp;
     <a href="#citation">Citation</a>
 </p>
 </center>
@@ -19,7 +19,7 @@
 
 # Installation
 ## Measure Command
-Check out our [latest release](https://github.com/webis-de/measure-cmd/releases/latest) to find a plethora of prebuilt binaries for various architectures (AMD64, ARM64) and operating systems (Windows, Linux, MacOS). Simply downloading what fits you should work since everything is compiled into a single file. 
+Check out our [latest release](https://github.com/tira-io/measure/releases/latest) to find a plethora of prebuilt binaries for various architectures (AMD64, ARM64) and operating systems (Windows, Linux, MacOS). Simply downloading what fits you should work since everything is compiled into a single file. 
 
 ## Measure API
 ### CMake (FetchContent)
@@ -27,7 +27,7 @@ Check out our [latest release](https://github.com/webis-de/measure-cmd/releases/
 include(FetchContent)
 
 # Use GIT_TAG to request the tag (or branch) you would like
-FetchContent_Declare(measure GIT_REPOSITORY https://github.com/webis-de/measure-cmd.git GIT_TAG v0.0.1)
+FetchContent_Declare(measure GIT_REPOSITORY https://github.com/tira-io/measure.git GIT_TAG v0.0.1)
 FetchContent_MakeAvailable(measure)
 target_link_libraries(<yourtarget> measure::measureapi)
 ```
