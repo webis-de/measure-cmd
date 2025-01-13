@@ -1,13 +1,80 @@
-# MeasureCMD
+<h1 align="center">measure</h1>
+<center>
+<p align="center">
+    <h3 align="center">Measuring what really matters</h3>
+</p>
+<p align="center">
+    <a><img alt="GPL 2.0 License" src="https://img.shields.io/github/license/webis-de/measure-cmd.svg" style="filter: none;"/></a>
+    <a><img alt="Current Release" src="https://img.shields.io/github/release/webis-de/measure-cmd.svg" style="filter: none;"/></a>
+    <br>
+    <a href="#installation">Installation</a> &nbsp;|&nbsp;
+    <a href="#command">Command</a> &nbsp;|&nbsp;
+    <a href="#api">API</a> &nbsp;|&nbsp;
+    <a href="https://github.com/webis-de/measure-cmd/tree/main/examples">Examples</a> &nbsp;|&nbsp;
+    <a href="#citation">Citation</a>
+</p>
+</center>
+
+
 
 # Installation
-## Linux
-`https://github.com/webis-de/measure-cmd/releases/download/latest/measure-0.0.1rc-Linux.deb`
+## Measure Command
+Check out our [latest release](https://github.com/webis-de/measure-cmd/releases/latest) to find a plethora of prebuilt binaries for various architectures (AMD64, ARM64) and operating systems (Windows, Linux, MacOS). Simply downloading what fits you should work since everything is compiled into a single file. 
+
+## Measure API
+### CMake (FetchContent)
+```cmake
+include(FetchContent)
+
+# Use GIT_TAG to request the tag (or branch) you would like
+FetchContent_Declare(measure GIT_REPOSITORY https://github.com/webis-de/measure-cmd.git GIT_TAG v0.0.1)
+FetchContent_MakeAvailable(measure)
+target_link_libraries(<yourtarget> measure::measureapi)
+```
+
+
 
 # Usage
-To measure system information on `<command> <arg> <arg> ...`, simply run
+Generally, `measure` offers two ways of measuring programs: a [commandline interface](#command) and a [C-API](#api) that can be called from and integrated into other languages easily. Please also have a look at the [examples](./examples) to see how it can be used.
+
+## Command
+Type `measurecmd --help` to get a full description of the supported commandline arguments. Generally, you only need to call
 ```
-measurecmd "<command> <arg> <arg> ..."
+measurecmd "<command>"
+```
+to measure everything, you may want to know about the shell command `<command>`.
+
+## API
+```c
+#include <measure_api.h>
+
+int main(int argc, char* argv[]) {
+    const char* sources[] { "git", "system", "energy", "gpu" };
+    char* outputJson;
+    struct Measure* handle = start_measure(sources, true);
+    /** Measure your code here **/
+
+    stop_measure(handle, &outputJson);
+    /** The collected data is serialized into outputJson **/
+}
 ```
 
-Find more using `measurecmd --help`.
+
+
+# Datasources
+## Git
+`TODO`
+
+## System
+`TODO`
+
+## Energy
+`TODO`
+
+## GPU
+`TODO`
+
+
+
+# Citation
+`TODO`
