@@ -67,7 +67,7 @@ void measure::stop_measure(measure::Measure* measure, char** result) {
 	auto str = measure->stop();
 	size_t memsize = str.length() + 1;
 	*result = static_cast<char*>(std::malloc(memsize)); // The caller has to free
-	assert(res != nullptr);
+	assert(result != nullptr);
 	std::memcpy(static_cast<void*>(*result), static_cast<const void*>(str.c_str()), memsize);
 	delete measure;
 }

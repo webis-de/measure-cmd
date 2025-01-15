@@ -1,7 +1,11 @@
+#if __linux__
 #include <stats/systemstats.hpp>
 
+#include <sys/resource.h>
+#include <sys/sysinfo.h>
+#include <unistd.h>
+
 #include <cinttypes>
-#include <format>
 
 using std::chrono::steady_clock;
 
@@ -25,38 +29,25 @@ void SystemStats::stop() { stoptime = steady_clock::now(); }
 void SystemStats::step() {
 	auto reltime = std::chrono::duration_cast<std::chrono::microseconds>(steady_clock::now() - starttime).count();
 	auto utilization = getUtilization();
-	maxRAM = std::max(utilization.ramUsedKB, maxRAM);
 	monitored.emplace_back(Entry{.timestamp = reltime, .usedRAM = utilization.ramUsedKB});
 }
 
 void SystemStats::getStats(Stats& stats) {
 	auto info = getSysInfo();
+	rusage resUsage;
+	/** \todo: handle errors (return value of getrusage) **/
+	getrusage(RUSAGE_CHILDREN, &resUsage);
+	
 	stats["system"] = Stat{Stats{
-			{"num cores", Stat{std::to_string(info.numCores)}}, {"ram", Stat{std::format("{} MB", info.totalRamMB)}}
+			{"num cores", Stat{std::to_string(info.numCores)}}, {"ram (MB)", Stat{std::to_string(info.totalRamMB)}}
 	}};
-	stats["elapsed time"] = Stat{
-			std::format("{} ms", std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())
-	};
-	stats["resources"] = Stat{Stats{{"Max RAM used", {std::format("{} KB", maxRAM)}}}};
+	stats["elapsed time"] = Stat{Stats{{
+		{"wallclock (ms)", {std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())}},
+		{"system (ms)", {std::to_string(resUsage.ru_stime.tv_sec*1000 + resUsage.ru_stime.tv_usec/1000)}},
+		{"user (ms)", {std::to_string(resUsage.ru_utime.tv_sec*1000 + resUsage.ru_utime.tv_usec/1000)}}
+	}}};
+	stats["resources"] = Stat{Stats{{"Max RAM used (KB)", {std::to_string(static_cast<unsigned>(resUsage.ru_maxrss))}}}};
 }
-
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-#error "Unsupported System" /** \todo add support **/
-
-#include <windows.h>
-
-SysInfo getSysInfo() {
-	SYSTEM_INFO info;
-	GetSystemInfo(&info);
-	return { .numCores = info.dwNumberOfProcessors, .totalRamMB = /** \todo **/ }
-}
-
-#elif __APPLE__
-#error "Unsupported System" /** \todo add support **/
-#elif __linux__
-#include <sys/resource.h>
-#include <sys/sysinfo.h>
-#include <unistd.h>
 
 SysInfo getSysInfo() {
 	struct sysinfo info;
@@ -69,9 +60,9 @@ Utilization getUtilization() {
 	/** \todo this is currently wrong! **/
 	struct rusage usageProc;
 	/** \todo: handle errors (return value of getrusage) **/
-	getrusage(RUSAGE_SELF, &usageProc);
-	return {.ramUsedKB = static_cast<unsigned>(usageProc.ru_maxrss)};
+	getrusage(RUSAGE_CHILDREN, &usageProc);
+	return {
+		.ramUsedKB = static_cast<unsigned>(usageProc.ru_maxrss)
+	};
 }
-#else
-#error "Unsupported System"
 #endif

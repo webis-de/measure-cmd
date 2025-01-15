@@ -11,7 +11,7 @@ add_library(measureapi SHARED
 	stats/energystats.cpp
 	stats/gitstats.cpp
 	stats/gpustats.cpp
-	stats/systemstats.cpp
+	stats/systemstats_linux.cpp
 )
 target_compile_features(measureapi PUBLIC cxx_std_20)
 target_include_directories(measureapi PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../include)
@@ -51,6 +51,7 @@ target_link_libraries(measureapi PRIVATE CPP_Joules)
 
 # LibGit
 option(USE_HTTPS OFF)
+option(BUILD_CLI OFF) # Do not build the Git CLI
 FetchContent_Declare(libgit GIT_REPOSITORY https://github.com/libgit2/libgit2.git GIT_TAG v1.8.4)
 FetchContent_MakeAvailable(libgit)
 set_property(TARGET libgit2 PROPERTY POSITION_INDEPENDENT_CODE ON)

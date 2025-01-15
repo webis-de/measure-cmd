@@ -69,14 +69,14 @@ static void runMeasureCmd(const MeasureCmdArgs& args) {
 
 #if defined(__GNUC__)
 #if defined(__clang__)
-static constexpr std::string compiler = "clang " __VERSION__;
+static constexpr const char* compiler = "clang " __VERSION__;
 #else
-static constexpr std::string compiler = "gcc " __VERSION__;
+static constexpr const char* compiler = "gcc " __VERSION__;
 #endif
 #elif defined(_MSC_VER)
-static constexpr std::string compiler = "msvc " _MSC_FULL_VER;
+static constexpr const char* compiler = "msvc " _MSC_FULL_VER;
 #else
-static constexpr std::string compiler = "unknown compiler";
+static constexpr const char* compiler = "unknown compiler";
 #endif
 
 int main(int argc, char* argv[]) {
