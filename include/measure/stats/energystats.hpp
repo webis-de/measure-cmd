@@ -16,6 +16,9 @@ namespace am {
 		void start() override;
 		void stop() override;
 		void getStats(Stats& stats) override;
+
+		static constexpr const char* description = "Collects the energy consumption of various components.";
+		static const char* version;
 	};
 } // namespace am
 

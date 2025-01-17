@@ -3,11 +3,16 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 option(MEASURECMD_BUILD_DEB "Build debian package" ON)
 option(MEASURECMD_ONLY_DOCS "Build only documentation -- this disables tests and others" OFF)
+option(MEASURECMD_BUILD_EXAMPLES "Build the examples" OFF)
 
-project(measurecmd VERSION 0.0.1 LANGUAGES CXX)
+project(measurecmd VERSION 0.0.1 LANGUAGES C CXX)
 
 if (NOT MEASURECMD_ONLY_DOCS)
     add_subdirectory(src)
+
+	if (MEASURECMD_BUILD_EXAMPLES)
+		add_subdirectory(examples)
+	endif()
 endif()
 
 
@@ -16,7 +21,7 @@ endif()
 ##########################################################################################
 # Debian Packaging only available if this is the main app
 if(NOT MEASURECMD_ONLY_DOCS AND (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND MEASURECMD_BUILD_DEB)
-	install(TARGETS measurecmd RUNTIME DESTINATION bin COMPONENT command)
+	install(TARGETS measure RUNTIME DESTINATION bin COMPONENT command)
 
 	SET(CPACK_GENERATOR "DEB")
 	SET(CPACK_PACKAGE_NAME "measure")

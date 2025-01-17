@@ -12,6 +12,9 @@ namespace am {
 		void start() override;
 		void stop() override;
 		void getStats(Stats& stats) override;
+
+		static constexpr const char* description = "Collects gpu related metrics.";
+		static const char* version;
 	};
 } // namespace am
 

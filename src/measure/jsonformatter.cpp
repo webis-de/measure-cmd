@@ -1,6 +1,6 @@
-#include <statformatter.hpp>
+#include <measure/statformatter.hpp>
 
-#include <utils/overloaded.hpp>
+#include "./utils/overloaded.hpp"
 
 static void recurseFormat(std::ostream& stream, const am::Stats& stats, std::string prefix) {
 	std::string sep = "\n";

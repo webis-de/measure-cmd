@@ -1,4 +1,7 @@
-#include <config.hpp>
+#include "config.hpp"
+#include "utils.hpp"
+
+#include <measureapi.h>
 
 #include <CLI/CLI.hpp>
 
@@ -8,7 +11,17 @@
 #include <ranges>
 #include <thread>
 
-#include <git2/version.h> /** \todo move into stats provider **/
+static void logCallback(mapiLogLevel level, const char* component, const char* message) {
+	static constexpr spdlog::level::level_enum levels[] = {
+			[mapiLogLevel::TRACE] = spdlog::level::level_enum::trace,
+			[mapiLogLevel::DEBUG] = spdlog::level::level_enum::debug,
+			[mapiLogLevel::INFO] = spdlog::level::level_enum::info,
+			[mapiLogLevel::WARN] = spdlog::level::level_enum::warn,
+			[mapiLogLevel::ERROR] = spdlog::level::level_enum::err,
+			[mapiLogLevel::CRITICAL] = spdlog::level::level_enum::critical
+	};
+	am::getLogger(component)->log(levels[level], message);
+}
 
 using am::MeasureCmdArgs;
 
@@ -20,10 +33,6 @@ static void setupLoggerArgs(CLI::App& app, am::LoggerConf& conf) {
 	app.add_flag("-q,--quiet", conf.quiet, "Supresses all outputs");
 }
 
-static void runCommand(std::promise<int> exitcode, std::string command) {
-	exitcode.set_value(std::system(command.c_str()));
-}
-
 static void runMeasureCmd(const MeasureCmdArgs& args) {
 	// Initialization and setup
 	am::setVerbosity(args.logConf.getVerbosity());
@@ -31,61 +40,37 @@ static void runMeasureCmd(const MeasureCmdArgs& args) {
 	logger->info("Measuring command: {}", args.command);
 
 	// Start measuring
-	auto providers = args.constructProviders();
-	for (auto& provider : providers)
-		provider->start();
+	std::vector<const char*> providers;
+	for (const auto& provider : args.statproviders)
+		providers.emplace_back(provider.c_str());
+	providers.emplace_back(nullptr);
+	auto conf = args.measureConf;
+	conf.provider = providers.data();
+
+	auto handle = mapiStartMeasure(conf);
 
 	// Run the command
-	std::promise<int> promise;
-	auto exitcodeFuture = promise.get_future();
-	std::thread cmdthread(runCommand, std::move(promise), args.command);
-
-	// Wait for the result (and continue monitoring if configured)
-	if (args.monitor) {
-		logger->debug("Monitoring is enabled, I will monitor once every {} ms", args.pollIntervallMs);
-		auto intervall = std::chrono::milliseconds{args.pollIntervallMs};
-		while (exitcodeFuture.wait_for(intervall) != std::future_status::ready) {
-			for (auto& provider : providers)
-				provider->step();
-		}
-	} else {
-		exitcodeFuture.wait();
-	}
-	cmdthread.join();
-	auto exitcode = exitcodeFuture.get();
+	auto exitcode = std::system(args.command.c_str());
 
 	// Stop measuring
-	for (auto& provider : providers | std::views::reverse)
-		provider->stop();
+	char* result;
+	mapiStopMeasure(handle, &result);
+	std::cout << result << std::endl;
+	free(result);
 
 	// Collect statistics and print them
-	am::Stats stats{{"exit code", {std::to_string(exitcode)}}};
+	/*am::Stats stats{{"exit code", {std::to_string(exitcode)}}};
 	for (auto& provider : providers)
 		provider->getStats(stats);
 
 	std::cout << "\n== RESULTS ==" << std::endl;
-	std::cout << *args.constructFormatter(std::move(stats));
+	std::cout << *args.constructFormatter(std::move(stats));*/
 }
 
-#if defined(__GNUC__)
-#if defined(__clang__)
-static constexpr const char* compiler = "clang " __VERSION__;
-#else
-static constexpr const char* compiler = "gcc " __VERSION__;
-#endif
-#elif defined(_MSC_VER)
-static constexpr const char* compiler = "msvc " _MSC_FULL_VER;
-#else
-static constexpr const char* compiler = "unknown compiler";
-#endif
-
 int main(int argc, char* argv[]) {
-	/** \todo add app description **/
-	CLI::App app("TODO");
-	auto versionString = std::format(
-			"libgit v.{}\n{}\nBuilt with {} for C++ {}", LIBGIT2_VERSION, am::getVersionStr(), compiler, __cplusplus
-	);
-	app.set_version_flag("-V,--version", versionString);
+	mapiSetLogCallback(logCallback);
+	CLI::App app("Measures runtime, energy, and many other metrics of a specifed command.");
+	app.set_version_flag("-V,--version", buildVersionString());
 	app.set_help_flag("-h,--help", "Prints this help message");
 
 	MeasureCmdArgs measureArgs;
@@ -95,12 +80,12 @@ int main(int argc, char* argv[]) {
 			->default_val("simple");
 	app.add_option("--source,-s", measureArgs.statproviders, "The datasources to poll information from")
 			->default_val(std::vector<std::string>{"git", "system", "energy"});
-	app.add_flag("--monitor,!--no-monitor", measureArgs.monitor)
+	app.add_flag("--monitor,!--no-monitor", measureArgs.measureConf.monitor)
 			->description(
 					"If set, monitors resource consumption continuously at the intervall specified in --poll-intervall."
 			)
 			->default_val(true);
-	app.add_option("--poll-intervall", measureArgs.pollIntervallMs)
+	app.add_option("--poll-intervall", measureArgs.measureConf.pollIntervallMs)
 			->description(
 					"The intervall in milliseconds in which to poll for updated stats like energy consumption and RAM "
 					"usage. Smaller intervalls allow for higher accuracy."

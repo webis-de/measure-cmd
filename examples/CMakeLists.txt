@@ -1,0 +1,2 @@
+add_subdirectory(01_c)
+add_subdirectory(03_measure_command)

@@ -1,6 +1,8 @@
-#include <stats/energystats.hpp>
+#include <measure/stats/energystats.hpp>
 
 using am::EnergyStats;
+
+const char* EnergyStats::version = nullptr;
 
 EnergyStats::EnergyStats() : tracker() {}
 

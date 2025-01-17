@@ -1,7 +1,11 @@
 #ifndef STATS_PROVIDER_HPP
 #define STATS_PROVIDER_HPP
 
+#include <measureapi.h>
+
+#include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <variant>
 
@@ -33,7 +37,17 @@ namespace am {
 		 * @param stats The stats to append to.
 		 */
 		virtual void getStats(Stats& stats) = 0;
+
+		static std::unique_ptr<StatsProvider> constructFromName(const std::string& name);
 	};
+
+	using ProviderConstructor = std::function<std::unique_ptr<StatsProvider>(void)>;
+	struct ProviderEntry final {
+		ProviderConstructor constructor;
+		const char* version;
+		const char* description;
+	};
+	extern const std::map<std::string, ProviderEntry> providers;
 } // namespace am
 
 #endif

@@ -2,10 +2,8 @@
 #define CONFIG_HPP
 
 #include "logging.hpp"
-#include "statformatter.hpp"
-#include "stats/provider.hpp"
 
-#include <spdlog/spdlog.h>
+#include <measureapi.h>
 
 #include <memory>
 #include <string>
@@ -37,12 +35,8 @@ namespace am {
 		std::string command;   /**< The command that should be measured **/
 		std::string formatter; /**< The identifier specifying the formatter to use for the output **/
 		std::vector<std::string> statproviders;
-		bool monitor = true;
-		size_t pollIntervallMs;
+		mapiConfig measureConf;
 		bool pedantic;
-
-		std::unique_ptr<StatFormatter> constructFormatter(const am::Stats& stats) const;
-		std::vector<std::unique_ptr<am::StatsProvider>> constructProviders() const;
 	};
 } // namespace am
 

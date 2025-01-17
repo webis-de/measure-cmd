@@ -1,5 +1,5 @@
 #if __linux__
-#include <stats/systemstats.hpp>
+#include <measure/stats/systemstats.hpp>
 
 #include <sys/resource.h>
 #include <sys/sysinfo.h>
@@ -10,6 +10,8 @@
 using std::chrono::steady_clock;
 
 using am::SystemStats;
+
+const char* SystemStats::version = nullptr;
 
 struct SysInfo {
 	unsigned numCores;
@@ -37,16 +39,18 @@ void SystemStats::getStats(Stats& stats) {
 	rusage resUsage;
 	/** \todo: handle errors (return value of getrusage) **/
 	getrusage(RUSAGE_CHILDREN, &resUsage);
-	
+
 	stats["system"] = Stat{Stats{
 			{"num cores", Stat{std::to_string(info.numCores)}}, {"ram (MB)", Stat{std::to_string(info.totalRamMB)}}
 	}};
-	stats["elapsed time"] = Stat{Stats{{
-		{"wallclock (ms)", {std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())}},
-		{"system (ms)", {std::to_string(resUsage.ru_stime.tv_sec*1000 + resUsage.ru_stime.tv_usec/1000)}},
-		{"user (ms)", {std::to_string(resUsage.ru_utime.tv_sec*1000 + resUsage.ru_utime.tv_usec/1000)}}
-	}}};
-	stats["resources"] = Stat{Stats{{"Max RAM used (KB)", {std::to_string(static_cast<unsigned>(resUsage.ru_maxrss))}}}};
+	stats["elapsed time"] = Stat{Stats{
+			{{"wallclock (ms)",
+			  {std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())}},
+			 {"system (ms)", {std::to_string(resUsage.ru_stime.tv_sec * 1000 + resUsage.ru_stime.tv_usec / 1000)}},
+			 {"user (ms)", {std::to_string(resUsage.ru_utime.tv_sec * 1000 + resUsage.ru_utime.tv_usec / 1000)}}}
+	}};
+	stats["resources"] =
+			Stat{Stats{{"Max RAM used (KB)", {std::to_string(static_cast<unsigned>(resUsage.ru_maxrss))}}}};
 }
 
 SysInfo getSysInfo() {
@@ -61,8 +65,6 @@ Utilization getUtilization() {
 	struct rusage usageProc;
 	/** \todo: handle errors (return value of getrusage) **/
 	getrusage(RUSAGE_CHILDREN, &usageProc);
-	return {
-		.ramUsedKB = static_cast<unsigned>(usageProc.ru_maxrss)
-	};
+	return {.ramUsedKB = static_cast<unsigned>(usageProc.ru_maxrss)};
 }
 #endif

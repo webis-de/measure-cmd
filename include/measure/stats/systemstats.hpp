@@ -23,6 +23,9 @@ namespace am {
 		void step() override;
 		void getStats(Stats& stats) override;
 
+		static constexpr const char* description = "Collects system components and utilization metrics.";
+		static const char* version;
+
 	private:
 		struct Entry {
 			int64_t timestamp;

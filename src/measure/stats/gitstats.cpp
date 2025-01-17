@@ -1,11 +1,16 @@
-#include <stats/gitstats.hpp>
+#include <measure/stats/gitstats.hpp>
+
+#include "../../logging.hpp"
 
 #include <git2.h>
 
+#include <format>
 #include <iostream>
 #include <string>
 
 using am::GitStats;
+
+const char* GitStats::version = "libgit v." LIBGIT2_VERSION;
 
 static std::string getLastCommitHash(git_repository* repo) {
 	git_oid id;
@@ -40,7 +45,7 @@ static std::string getRemoteOrigin(git_repository* repo) {
 	return url;
 }
 
-GitStats::GitStats() : logger(getLogger("gitstats")), repo(nullptr) {
+GitStats::GitStats() : repo(nullptr) {
 	git_libgit2_init();
 	int error = git_repository_open_ext(&repo, "./", 0, nullptr);
 	if (error < 0) {
@@ -53,7 +58,9 @@ GitStats::~GitStats() { git_libgit2_shutdown(); }
 
 bool GitStats::isRepository() const noexcept { return repo != nullptr; }
 
-void GitStats::start() { logger->info("Is a Git Repository: {}", (isRepository() ? "Yes" : "No")); }
+void GitStats::start() {
+	measureapi::log::info("gitstats", "Is a Git Repository: {}", (isRepository() ? "Yes" : "No"));
+}
 void GitStats::stop() { /* nothing to do */ }
 void GitStats::getStats(Stats& stats) {
 	if (isRepository()) {

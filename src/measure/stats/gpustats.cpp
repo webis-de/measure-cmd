@@ -1,8 +1,10 @@
-#include <stats/gpustats.hpp>
+#include <measure/stats/gpustats.hpp>
 
 #include <nvml/nvml.h>
 
 using am::GPUStats;
+
+const char* GPUStats::version = "nvml v." NVML_API_VERSION_STR;
 
 GPUStats::GPUStats() { /** \todo implement **/ }
 
