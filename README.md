@@ -50,14 +50,14 @@ to measure everything, you may want to know about the shell command `<command>`.
 #include <measureapi.h>
 
 int main(int argc, char* argv[]) {
-	const char* provider[] = {"git", "system", "gpu", "energy", NULL};
+    const char* provider[] = {"git", "system", "gpu", "energy", NULL};
     char* outputJson;
-	mapiConfig config = {.provider = provider, .monitor = true, .pollIntervallMs = 1000};
+    mapiConfig config = {.provider = provider, .monitor = true, .pollIntervallMs = 1000};
 
-	mapiMeasure* measure = mapiStartMeasure(config);
+    mapiMeasure* measure = mapiStartMeasure(config);
     /** Measure your code here **/
 
-	mapiStopMeasure(handle, &outputJson);
+    mapiStopMeasure(handle, &outputJson);
     /** The collected data is serialized into outputJson and needs to be freed by the caller **/
 }
 ```
@@ -112,6 +112,7 @@ Timeseries datatypes are denoted `[T]`, where `T` is the datatype of each entry.
 | `gpu` &gt; `Max VRAM Used (MB)`        | UInt    |                                                                                                      | Planned     |
 | `gpu` &gt; `Utilization (%)`           | [Float] |                                                                                                      | Planned     |
 | `gpu` &gt; `Max Utilization (%)`       | Float   |                                                                                                      | Planned     |
+| `system` &gt; `Max VRAM Used (MB)`     | UInt    |                                                                                                      | Implemented |
 
 # Citation
 `TODO`

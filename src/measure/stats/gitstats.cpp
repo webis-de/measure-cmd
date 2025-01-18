@@ -9,6 +9,7 @@
 #include <string>
 
 using am::GitStats;
+using am::Stats;
 
 const char* GitStats::version = "libgit v." LIBGIT2_VERSION;
 
@@ -62,15 +63,16 @@ void GitStats::start() {
 	measureapi::log::info("gitstats", "Is a Git Repository: {}", (isRepository() ? "Yes" : "No"));
 }
 void GitStats::stop() { /* nothing to do */ }
-void GitStats::getStats(Stats& stats) {
+Stats GitStats::getStats() {
 	if (isRepository()) {
-		stats["git"] = Stat{
-				Stats{{"isrepo", {"1"}},
-					  {"tag", {getShortname(repo)}},
-					  {"last commit", {getLastCommitHash(repo)}},
-					  {"remote", {Stats{{"origin", {getRemoteOrigin(repo)}}}}}}
+		return {
+				{"git",
+				 {{"isrepo", {"1"}},
+				  {"tag", {getShortname(repo)}},
+				  {"last commit", {getLastCommitHash(repo)}},
+				  {"remote", {{{"origin", {getRemoteOrigin(repo)}}}}}}}
 		};
 	} else {
-		stats["git"] = Stat{Stats{{"isrepo", Stat{"0"}}}};
+		return {{"git", {{"isrepo", {"0"}}}}};
 	}
 }

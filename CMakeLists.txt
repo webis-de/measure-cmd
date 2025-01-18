@@ -21,6 +21,10 @@ endif()
 ##########################################################################################
 # Debian Packaging only available if this is the main app
 if(NOT MEASURECMD_ONLY_DOCS AND (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND MEASURECMD_BUILD_DEB)
+	if (NOT MEASURECMD_BUILD_EXAMPLES)
+		add_subdirectory(examples/03_measure_command)
+	endif()
+	
 	install(TARGETS measure RUNTIME DESTINATION bin COMPONENT command)
 
 	SET(CPACK_GENERATOR "DEB")

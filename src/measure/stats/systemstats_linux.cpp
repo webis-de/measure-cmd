@@ -9,6 +9,7 @@
 
 using std::chrono::steady_clock;
 
+using am::Stats;
 using am::SystemStats;
 
 const char* SystemStats::version = nullptr;
@@ -34,23 +35,22 @@ void SystemStats::step() {
 	monitored.emplace_back(Entry{.timestamp = reltime, .usedRAM = utilization.ramUsedKB});
 }
 
-void SystemStats::getStats(Stats& stats) {
+Stats SystemStats::getStats() {
 	auto info = getSysInfo();
 	rusage resUsage;
 	/** \todo: handle errors (return value of getrusage) **/
 	getrusage(RUSAGE_CHILDREN, &resUsage);
 
-	stats["system"] = Stat{Stats{
-			{"num cores", Stat{std::to_string(info.numCores)}}, {"ram (MB)", Stat{std::to_string(info.totalRamMB)}}
-	}};
-	stats["elapsed time"] = Stat{Stats{
-			{{"wallclock (ms)",
-			  {std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())}},
-			 {"system (ms)", {std::to_string(resUsage.ru_stime.tv_sec * 1000 + resUsage.ru_stime.tv_usec / 1000)}},
-			 {"user (ms)", {std::to_string(resUsage.ru_utime.tv_sec * 1000 + resUsage.ru_utime.tv_usec / 1000)}}}
-	}};
-	stats["resources"] =
-			Stat{Stats{{"Max RAM used (KB)", {std::to_string(static_cast<unsigned>(resUsage.ru_maxrss))}}}};
+	return {
+			{{"system",
+			  {{"num cores", {std::to_string(info.numCores)}}, {"ram (MB)", {std::to_string(info.totalRamMB)}}}},
+			 {"elapsed time",
+			  {{"wallclock (ms)",
+				{std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(stoptime - starttime).count())}},
+			   {"system (ms)", {std::to_string(resUsage.ru_stime.tv_sec * 1000 + resUsage.ru_stime.tv_usec / 1000)}},
+			   {"user (ms)", {std::to_string(resUsage.ru_utime.tv_sec * 1000 + resUsage.ru_utime.tv_usec / 1000)}}}},
+			 {"resources", {{"Max RAM used (KB)", {std::to_string(static_cast<unsigned>(resUsage.ru_maxrss))}}}}}
+	};
 }
 
 SysInfo getSysInfo() {

@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
 	app.add_option("--format,-f", measureArgs.formatter, "Specified how the output should be formatted")
 			->default_val("simple");
 	app.add_option("--source,-s", measureArgs.statproviders, "The datasources to poll information from")
-			->default_val(std::vector<std::string>{"git", "system", "energy"});
+			->default_val(std::vector<std::string>{"git", "system", "energy", "gpu"});
 	app.add_flag("--monitor,!--no-monitor", measureArgs.measureConf.monitor)
 			->description(
 					"If set, monitors resource consumption continuously at the intervall specified in --poll-intervall."

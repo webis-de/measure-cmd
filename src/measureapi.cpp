@@ -51,11 +51,11 @@ struct mapiMeasure final {
 			provider->stop();
 
 		// Collect statistics and print them
-		am::Stats stats;
+		am::Stats stats{}; /** \todo ranges **/
 		for (auto& provider : providers)
-			provider->getStats(stats);
+			stats = am::Stats::merge(stats, provider->getStats());
 		std::ostringstream stream;
-		stream << JsonFormatter(std::move(stats));
+		stream << SimpleFormatter(std::move(stats));
 		return std::move(stream.str());
 	}
 

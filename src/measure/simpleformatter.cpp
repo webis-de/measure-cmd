@@ -3,19 +3,11 @@
 #include "./utils/overloaded.hpp"
 
 static void recurseFormat(std::ostream& stream, const am::Stats& stats, std::string prefix) {
-	for (auto&& [key, val] : stats) {
-		std::visit(
-				am::utils::overloaded{
-						[&stream, key, prefix](const std::string& val) {
-							stream << '[' << prefix << key << "] " << val << std::endl;
-						},
-						[&stream, key, prefix](const am::Stats& stats) {
-							recurseFormat(stream, stats, prefix + key + "/");
-						},
-				},
-				val
-		);
-	}
+	if (stats.isLeaf())
+		stream << '[' << prefix << "] " << stats.item() << std::endl;
+	else
+		for (const auto& [key, value] : stats.children())
+			recurseFormat(stream, value, prefix + (prefix.empty() ? "" : "/") + key);
 }
 
 SimpleFormatter::SimpleFormatter(const am::Stats& stats) : stats(stats) {}

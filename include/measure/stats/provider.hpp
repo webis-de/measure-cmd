@@ -3,6 +3,7 @@
 
 #include <measureapi.h>
 
+#include <cassert>
 #include <functional>
 #include <map>
 #include <memory>
@@ -10,9 +11,51 @@
 #include <variant>
 
 namespace am {
-	struct Stat;
-	using Stats = std::map<std::string, Stat>;
-	struct Stat : public std::variant<std::string, Stats> {};
+	struct Stats {
+	private:
+		std::variant<std::string, std::map<std::string, Stats>> value;
+
+	public:
+		Stats(const std::string& value) noexcept : value(value) {}
+		Stats(const std::initializer_list<std::pair<const std::string, Stats>>& value) noexcept : value(value) {}
+		Stats(std::string&& value) noexcept : value(value) {}
+		Stats(std::initializer_list<std::pair<const std::string, Stats>>&& value) noexcept : value(value) {}
+
+		bool isLeaf() const noexcept { return !std::holds_alternative<std::map<std::string, Stats>>(value); }
+		const std::map<std::string, Stats>& children() const noexcept {
+			assert(!isLeaf());
+			return std::get<std::map<std::string, Stats>>(value);
+		}
+		const std::string& item() const noexcept {
+			assert(isLeaf());
+			return std::get<std::string>(value);
+		}
+
+		void insertChild(const std::string& name, Stats&& stats) {
+			assert(!isLeaf());
+			auto& map = std::get<std::map<std::string, Stats>>(value);
+			map.insert_or_assign(name, stats);
+		}
+
+		static Stats merge(const Stats& left, const Stats& right) {
+			assert(!left.isLeaf() && !right.isLeaf());
+			Stats merged{};
+			const auto& rc = right.children();
+			const auto& lc = left.children();
+			std::map<std::string, Stats>::const_iterator it;
+			for (const auto& [key, value] : lc) {
+				if ((it = rc.find(key)) != rc.end()) // Present in left and right
+					merged.insertChild(key, merge(value, it->second));
+				else // Present only in left
+					merged.insertChild(key, Stats{value});
+			}
+			for (const auto& [key, value] : rc) {
+				if (lc.find(key) == lc.end()) // Present only in right
+					merged.insertChild(key, Stats{value});
+			}
+			return merged;
+		}
+	};
 
 	class StatsProvider {
 	public:
@@ -34,9 +77,9 @@ namespace am {
 		 * @brief Append the statistics from this provider to the given stats. This is called once after
 		 * StatsProvider::stop().
 		 * 
-		 * @param stats The stats to append to.
+		 * @returns the statistics that were measured
 		 */
-		virtual void getStats(Stats& stats) = 0;
+		virtual Stats getStats() = 0;
 
 		static std::unique_ptr<StatsProvider> constructFromName(const std::string& name);
 	};

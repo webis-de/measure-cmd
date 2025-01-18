@@ -36,11 +36,14 @@
 				"C_Cpp.codeAnalysis.clangTidy.args": [
 					"-p ${workspaceFolder}/build/compile_commands.json"
 				],
+				"cmake.configureSettings": {
+					"MEASURECMD_BUILD_EXAMPLES": true
+				},
 				"launch": {
 					"version": "0.2.0",
 					"configurations": [
 						{
-							"name": "(gdb) measurecmd -vvv --format=json \"echo hello world\"",
+							"name": "(gdb) measure -vvv --format=json \"echo hello world\"",
 							"type": "cppdbg",
 							"request": "launch",
 							// Resolved by CMake Tools:
