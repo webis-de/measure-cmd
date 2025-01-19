@@ -1,6 +1,7 @@
 #include <measure/stats/gpustats.hpp>
 
 #include "../../logging.hpp"
+#include "../utils/sharedlib.hpp"
 
 #include <nvml/nvml.h>
 
@@ -8,6 +9,44 @@ using am::GPUStats;
 using am::Stats;
 
 const char* GPUStats::version = "nvml v." NVML_API_VERSION_STR;
+
+struct NVMLLib final : am::utils::SharedLib {
+public:
+	using INIT_V2 = nvmlReturn_t (*)(void);
+	INIT_V2 init = load<INIT_V2>({"nvmlInit_v2"});
+
+	using ERROR_STRING = const char* (*)(nvmlReturn_t result);
+	ERROR_STRING errorString = load<ERROR_STRING>({"nvmlErrorString"});
+
+	/** SYSTEM */
+	using SYSTEM_GET_DRIVER_VERSION = nvmlReturn_t (*)(char* version, unsigned int length);
+	SYSTEM_GET_DRIVER_VERSION systemGetDriverVersion = load<SYSTEM_GET_DRIVER_VERSION>({"nvmlSystemGetDriverVersion"});
+
+	/** DEVICE **/
+	using DEVICE_GET_COUNT = nvmlReturn_t (*)(unsigned int* deviceCount);
+	DEVICE_GET_COUNT deviceGetCount = load<DEVICE_GET_COUNT>({"nvmlDeviceGetCount_v2"});
+	using DEVICE_GET_HANDLE_BY_INDEX = nvmlReturn_t (*)(unsigned int index, nvmlDevice_t* device);
+	DEVICE_GET_HANDLE_BY_INDEX deviceGetHandleByIndex =
+			load<DEVICE_GET_HANDLE_BY_INDEX>({"nvmlDeviceGetHandleByIndex_v2"});
+	using DEVICE_GET_ARCHITECTURE = nvmlReturn_t (*)(nvmlDevice_t device, nvmlDeviceArchitecture_t* arch);
+	DEVICE_GET_ARCHITECTURE deviceGetArchitecture = load<DEVICE_GET_ARCHITECTURE>({"nvmlDeviceGetArchitecture"});
+	using DEVICE_GET_NAME = nvmlReturn_t (*)(nvmlDevice_t device, char* name, unsigned int length);
+	DEVICE_GET_NAME deviceGetName = load<DEVICE_GET_NAME>({"nvmlDeviceGetName"});
+	using DEVICE_GET_MEMORY_INFO = nvmlReturn_t (*)(nvmlDevice_t device, nvmlMemory_t* memory);
+	DEVICE_GET_MEMORY_INFO deviceGetMemoryInfo = load<DEVICE_GET_MEMORY_INFO>({"nvmlDeviceGetMemoryInfo"});
+
+#if defined(__linux__)
+	NVMLLib() : am::utils::SharedLib("libnvidia-ml.so.1") {}
+#elif defined(__APPLE__)
+/** \todo This should not be an error, the SharedLib instance should just not be "good" **/
+#error "MacOS is not supported to fetch NVIDIA GPU information"
+#elif defined(_WIN64)
+/** \todo add support **/
+#error "Support for windows needs to be added here"
+#else
+#error "Unsupported OS"
+#endif
+} nvml;
 
 static const char* nvmlArchToStr(nvmlDeviceArchitecture_t arch) {
 	switch (arch) {
@@ -32,10 +71,12 @@ static const char* nvmlArchToStr(nvmlDeviceArchitecture_t arch) {
 }
 
 static bool initNVML() {
-	switch (nvmlInit_v2()) {
+	if (!nvml.good())
+		return false;
+	switch (nvml.init()) {
 	case NVML_SUCCESS:
 		char buf[80];
-		nvmlSystemGetDriverVersion(buf, sizeof(buf) - 1);
+		nvml.systemGetDriverVersion(buf, sizeof(buf) - 1);
 		measureapi::log::info("gpustats", "NVML was loaded successfully with driver version {}", buf);
 		return true;
 	case NVML_ERROR_DRIVER_NOT_LOADED:
@@ -52,23 +93,23 @@ GPUStats::GPUStats() : nvml({.supported = initNVML(), .devices = {}}) {
 	if (!nvml.supported)
 		return;
 	unsigned int count;
-	switch (nvmlDeviceGetCount_v2(&count)) {
+	switch (::nvml.deviceGetCount(&count)) {
 	case NVML_SUCCESS:
 		measureapi::log::info("gpustats", "Found {} device(s):", count);
 		for (unsigned i = 0u; i < count; ++i) {
 			nvmlDevice_t device;
-			switch (nvmlReturn_t ret; ret = nvmlDeviceGetHandleByIndex_v2(i, &device)) {
+			switch (nvmlReturn_t ret; ret = ::nvml.deviceGetHandleByIndex(i, &device)) {
 			case NVML_SUCCESS:
 				nvmlDeviceArchitecture_t arch;
-				nvmlDeviceGetArchitecture(device, &arch);
+				::nvml.deviceGetArchitecture(device, &arch);
 				char name[96];
-				nvmlDeviceGetName(device, name, sizeof(name) - 1);
+				::nvml.deviceGetName(device, name, sizeof(name) - 1);
 				measureapi::log::info("gpustats", "\t[{}] {} ({} Architecture)", i, name, nvmlArchToStr(arch));
 				nvml.devices.emplace_back(device);
 				break;
 			default:
 				measureapi::log::error(
-						"gpustats", "\t[{}] fetching handle failed with error {}", i, nvmlErrorString(ret)
+						"gpustats", "\t[{}] fetching handle failed with error {}", i, ::nvml.errorString(ret)
 				);
 				break;
 			}
@@ -93,12 +134,12 @@ void GPUStats::step() {
 		return;
 	nvmlMemory_t memory;
 	for (auto device : nvml.devices) {
-		if (nvmlReturn_t ret; (ret = nvmlDeviceGetMemoryInfo(device, &memory)) == NVML_SUCCESS) {
+		if (nvmlReturn_t ret; (ret = ::nvml.deviceGetMemoryInfo(device, &memory)) == NVML_SUCCESS) {
 			std::cout << "\r used/total (MB):\t" << memory.used / 1000 / 1000 << " / " << memory.total / 1000 / 1000
 					  << std::flush;
 			nvml.vramUsageTotal.addValue(memory.used / 1000 / 1000);
 		} else {
-			measureapi::log::critical("gpustats", "Could not fetch memory information: {}", nvmlErrorString(ret));
+			measureapi::log::critical("gpustats", "Could not fetch memory information: {}", ::nvml.errorString(ret));
 			abort(); /** \todo how to handle? **/
 		}
 	}

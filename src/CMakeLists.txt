@@ -64,5 +64,3 @@ FetchContent_Declare(nvml GIT_REPOSITORY https://github.com/NVIDIA/go-nvml.git G
 FetchContent_MakeAvailable(nvml)
 target_include_directories(measureapi PRIVATE ${nvml_SOURCE_DIR}/gen/)
 target_include_directories(measureapi_static PRIVATE ${nvml_SOURCE_DIR}/gen/)
-target_link_libraries(measureapi PRIVATE libnvidia-ml.so.1) # TODO: remove when debugging the feature is done and load at runtime!
-target_link_libraries(measureapi_static PRIVATE libnvidia-ml.so.1) # TODO: remove when debugging the feature is done and load at runtime!
