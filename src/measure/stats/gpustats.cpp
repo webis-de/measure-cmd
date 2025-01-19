@@ -133,6 +133,7 @@ void GPUStats::step() {
 	if (!nvml.supported)
 		return;
 	nvmlMemory_t memory;
+	/** \todo support multi-gpu **/
 	for (auto device : nvml.devices) {
 		if (nvmlReturn_t ret; (ret = ::nvml.deviceGetMemoryInfo(device, &memory)) == NVML_SUCCESS) {
 			std::cout << "\r used/total (MB):\t" << memory.used / 1000 / 1000 << " / " << memory.total / 1000 / 1000
@@ -147,7 +148,17 @@ void GPUStats::step() {
 
 Stats GPUStats::getStats() {
 	if (nvml.supported) {
-		return {{"gpu", {{"supported", {"1"}}}},
+		std::string vramTotal;
+		for (auto& device : nvml.devices) {
+			nvmlMemory_t memory;
+			if (nvmlReturn_t ret; (ret = ::nvml.deviceGetMemoryInfo(device, &memory)) == NVML_SUCCESS) {
+				vramTotal += std::to_string(memory.total / 1000 / 1000) + ",";
+			} else {
+				vramTotal += "None,";
+			}
+		}
+
+		return {{"gpu", {{"supported", {"1"}}, {"VRAM (MB)", {vramTotal}}}},
 				{"system", {{"Max VRAM Used (MB)", {std::to_string(nvml.vramUsageTotal.maxValue())}}}}};
 		/** \todo implement **/
 	} else {

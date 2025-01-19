@@ -52,6 +52,7 @@ namespace am::utils {
 		}
 
 	public:
+		SharedLib() noexcept : handle(nullptr) {}
 		SharedLib(const std::filesystem::path& path) noexcept : handle(details::openlib(path)) {}
 		SharedLib(SharedLib&& other) noexcept : handle(std::move(other.handle)) { other.handle = nullptr; }
 

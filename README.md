@@ -66,53 +66,54 @@ int main(int argc, char* argv[]) {
 
 # Datasources
 
-Timeseries datatypes are denoted `[T]`, where `T` is the datatype of each entry.
+Timeseries datatypes are denoted `T...`, where `T` is the datatype of each entry. Similarly, arrays are denoted as `[T]`.
 
 ## Git
 
-| Name                                   | Type    | Description                                                                                          |   Status    |
-|----------------------------------------|---------|------------------------------------------------------------------------------------------------------|-------------|
-| `git` &gt; `isrepo`                    | Boolean | Checks if the current working directory is (part of) a Git repository                                | Implemented |
-| `git` &gt; `tag`                       | String  | Retrieves the tag or branch name that is checked out                                                 | Implemented |
-| `git` &gt; `last commit`               | String  | Holds the hash identifying the latest commit                                                         | Implemented |
-| `git` &gt; `remote` &gt; `origin`      | String  | Contains the URL to the `origin` remote if such a remote exists                                      | Implemented |
-| `git` &gt; `up to date`                | Boolean | True if no changes to files in the repository are uncommitted                                        | Planned     |
-| `git` &gt; `unchecked files`           | Boolean | True if files exist that are not ignored by the `.gitignore` and are not checked into the repository | Planned     |
-| `git` &gt; `hash`                      | String  | The hash of all files checked into the repository                                                    | Planned     |
+| Name                                   | Type      | Description                                                                                          |   Status    |
+|----------------------------------------|-----------|------------------------------------------------------------------------------------------------------|-------------|
+| `git` &gt; `isrepo`                    | Boolean   | Checks if the current working directory is (part of) a Git repository                                | Implemented |
+| `git` &gt; `tag`                       | String    | Retrieves the tag or branch name that is checked out                                                 | Implemented |
+| `git` &gt; `last commit`               | String    | Holds the hash identifying the latest commit                                                         | Implemented |
+| `git` &gt; `remote` &gt; `origin`      | String    | Contains the URL to the `origin` remote if such a remote exists                                      | Implemented |
+| `git` &gt; `up to date`                | Boolean   | True if no changes to files in the repository are uncommitted                                        | Planned     |
+| `git` &gt; `unchecked files`           | Boolean   | True if files exist that are not ignored by the `.gitignore` and are not checked into the repository | Planned     |
+| `git` &gt; `hash`                      | String    | The hash of all files checked into the repository                                                    | Planned     |
 
 ## System
 
-| Name                                   | Type    | Description                                                                                          |   Status    |
-|----------------------------------------|---------|------------------------------------------------------------------------------------------------------|-------------|
-| `elapsed time` &gt; `wallclock (ms)`   | Float   | The wallclock ("real") time the program took to run                                                  | Implemented |
-| `elapsed time` &gt; `user (ms)`        | Float   | The total time the program spent in user mode                                                        | Implemented |
-| `elapsed time` &gt; `system (ms)`      | Float   | The total time the program spent in system mode                                                      | Implemented |
-| `resources` &gt; `RAM Used (KB)`       | [UInt]  | The time series of RAM utilization                                                                   | Implemented |
-| `resources` &gt; `Max RAM Used (KB)`   | UInt    | The most amount of RAM the program used at any one point                                             | Implemented |
-| `resources` &gt; `CPU Utilization (%)` | [UInt]  | The time series of **process'** CPU utilization of the                                               | Planned     |
-| `system` &gt; `num cores`              | UInt    | The total number of CPU cores installed in the system                                                | Implemented |
-| `system` &gt; `RAM (MB)`               | UInt    | The total amount of RAM installed in the system                                                      | Implemented |
-| `system` &gt; `RAM Used (MB)`          | [UInt]  | The time series of entire **system's** RAM utilization                                               | Planned     |
-| `system` &gt; `CPU Utilization (%)`    | [Float] | The time series of entire **system's** CPU utilization                                               | Planned     |
+| Name                                   | Type      | Description                                                                                          |   Status    |
+|----------------------------------------|-----------|------------------------------------------------------------------------------------------------------|-------------|
+| `elapsed time` &gt; `wallclock (ms)`   | Float     | The wallclock ("real") time the program took to run                                                  | Implemented |
+| `elapsed time` &gt; `user (ms)`        | Float     | The total time the program spent in user mode                                                        | Implemented |
+| `elapsed time` &gt; `system (ms)`      | Float     | The total time the program spent in system mode                                                      | Implemented |
+| `resources` &gt; `RAM Used (KB)`       | UInt...   | The time series of RAM utilization                                                                   | Implemented |
+| `resources` &gt; `Max RAM Used (KB)`   | UInt      | The most amount of RAM the program used at any one point                                             | Implemented |
+| `resources` &gt; `CPU Utilization (%)` | UInt...   | The time series of **process'** CPU utilization of the                                               | Planned     |
+| `system` &gt; `num cores`              | UInt      | The total number of CPU cores installed in the system                                                | Implemented |
+| `system` &gt; `RAM (MB)`               | UInt      | The total amount of RAM installed in the system                                                      | Implemented |
+| `system` &gt; `RAM Used (MB)`          | UInt...   | The time series of entire **system's** RAM utilization                                               | Planned     |
+| `system` &gt; `CPU Utilization (%)`    | Float...  | The time series of entire **system's** CPU utilization                                               | Planned     |
 
 ## Energy
 
-| Name                                   | Type    | Description                                                                                          |   Status    |
-|----------------------------------------|---------|------------------------------------------------------------------------------------------------------|-------------|
-| `energy` &gt; `CPU`                    | [Float] |                                                                                                      | Planned     |
-| `energy` &gt; `GPU`                    | [Float] |                                                                                                      | Planned     |
-| `energy` &gt; `DRAM`                   | [Float] |                                                                                                      | Planned     |
+| Name                                   | Type      | Description                                                                                          |   Status    |
+|----------------------------------------|-----------|------------------------------------------------------------------------------------------------------|-------------|
+| `energy` &gt; `CPU`                    | Float...  |                                                                                                      | Planned     |
+| `energy` &gt; `GPU`                    | Float...  |                                                                                                      | Planned     |
+| `energy` &gt; `DRAM`                   | Float...  |                                                                                                      | Planned     |
 
 ## GPU
 
-| Name                                   | Type    | Description                                                                                          |   Status    |
-|----------------------------------------|---------|------------------------------------------------------------------------------------------------------|-------------|
-| `gpu` &gt; `VRAM (MB)`                 | UInt    |                                                                                                      | Planned     |
-| `gpu` &gt; `VRAM Used (MB)`            | [UInt]  |                                                                                                      | Planned     |
-| `gpu` &gt; `Max VRAM Used (MB)`        | UInt    |                                                                                                      | Planned     |
-| `gpu` &gt; `Utilization (%)`           | [Float] |                                                                                                      | Planned     |
-| `gpu` &gt; `Max Utilization (%)`       | Float   |                                                                                                      | Planned     |
-| `system` &gt; `Max VRAM Used (MB)`     | UInt    |                                                                                                      | Implemented |
+| Name                                       | Type      | Description                                                                                          |   Status    |
+|--------------------------------------------|-----------|------------------------------------------------------------------------------------------------------|-------------|
+| `resources` &gt; `VRAM Used (MB)`          | [UInt]... |                                                                                                      | Planned     |
+| `resources` &gt; `Max VRAM Used (MB)`      | [UInt]    |                                                                                                      | Planned     |
+| `resources` &gt; `GPU Utilization (%)`     | [Float]...|                                                                                                      | Planned     |
+| `resources` &gt; `Max GPU Utilization (%)` | [Float]   |                                                                                                      | Planned     |
+| `system` &gt; `VRAM (MB)`                  | [UInt]    |                                                                                                      | Implemented |
+| `system` &gt; `Max VRAM Used (MB)`         | [UInt]    |                                                                                                      | Implemented |
+| `system` &gt; `VRAM Used (MB)`             | [UInt]... |                                                                                                      | Planned     |
 
 # Citation
 `TODO`

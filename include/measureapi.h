@@ -104,7 +104,15 @@ typedef struct mapiConfig_st {
 /**
  * @brief Holds a handle to an ongoing measurement task.
  */
-typedef struct mapiMeasure mapiMeasure;
+typedef struct mapiMeasure_st mapiMeasure;
+
+/**
+ * @brief Holds a handle to the results of a measurement.
+ * @details The measurement result is structed as a tree of categories, subcategories and (at the leaves) values.
+ * 
+ * @see mapiStopMeasure(mapiMeasure*, char**)
+ */
+typedef struct mapiResult_st mapiResult;
 
 /**
  * @brief Initializes the providers set in the configuration and starts measuring.
@@ -120,9 +128,16 @@ MA_EXPORT mapiMeasure* mapiStartMeasure(mapiConfig config);
  * @details This function **must** be called **exactly once** for each measurement job.
  * 
  * @param measure The handle of the running measurement that should be stopped.
- * @param result A pointer to write the result into. Must be freed by the caller. 
+ * @return a handle to the result tree of the measurement. Must be freed by the caller using mapiResultFree(mapiResult*)
+ * @see mapiStartMeasure(mapiConfig)
  */
-MA_EXPORT void mapiStopMeasure(mapiMeasure* measure, char** result);
+MA_EXPORT mapiResult* mapiStopMeasure(mapiMeasure* measure);
+
+MA_EXPORT bool mapiResultGetValue(const mapiResult* result, void const** value);
+
+MA_EXPORT size_t mapiResultGetChildren(const mapiResult* result, mapiResult const** buf, size_t bufsize);
+
+MA_EXPORT void mapiResultFree(mapiResult* result);
 #ifdef __cplusplus
 }
 #endif

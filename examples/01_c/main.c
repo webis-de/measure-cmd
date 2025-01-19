@@ -9,6 +9,20 @@ void logcallback(mapiLogLevel level, const char* component, const char* message)
 	printf("[%s] [%s] %s\n", levlToStr[level], component, message);
 }
 
+void printResult(const mapiResult* result) {
+	const char* value;
+	if (mapiResultGetValue(result, (const void**)&value)) {
+		printf("%s", value);
+		fflush(stdout);
+	} else {
+		size_t num = mapiResultGetChildren(result, NULL, 0);
+		const mapiResult** buf = calloc(sizeof(mapiResult*), num);
+		mapiResultGetChildren(result, buf, num);
+		for (size_t i = 0; i < num; ++i)
+			printResult(buf[i]);
+	}
+}
+
 int main(int argc, char* argv[]) {
 	mapiSetLogCallback(logcallback);
 
@@ -23,11 +37,18 @@ int main(int argc, char* argv[]) {
 		free(data);
 	}
 
-	char* result;
-	mapiStopMeasure(measure, &result);
+	//char* result;
+	//mapiStopMeasure(measure, &result);
 
-	printf("%s\n", result);
+	//printf("%s\n", result);
 
-	free(result);
+	//free(result);
+
+	mapiResult* result = mapiStopMeasure(measure);
+
+	printResult(result);
+
+	mapiResultFree(result);
+
 	return 0;
 }
