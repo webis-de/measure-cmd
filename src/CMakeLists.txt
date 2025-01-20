@@ -6,8 +6,6 @@ add_library(measureapi SHARED
 	logging.cpp
 	measure/stats/provider.cpp
 
-	measure/jsonformatter.cpp
-	measure/simpleformatter.cpp
 	measure/stats/energystats.cpp
 	measure/stats/gitstats.cpp
 	measure/stats/gpustats.cpp
@@ -24,8 +22,6 @@ add_library(measureapi_static STATIC
 	logging.cpp
 	measure/stats/provider.cpp
 
-	measure/jsonformatter.cpp
-	measure/simpleformatter.cpp
 	measure/stats/energystats.cpp
 	measure/stats/gitstats.cpp
 	measure/stats/gpustats.cpp

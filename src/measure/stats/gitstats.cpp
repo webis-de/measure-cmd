@@ -1,4 +1,4 @@
-#include <measure/stats/gitstats.hpp>
+#include "gitstats.hpp"
 
 #include "../../logging.hpp"
 
@@ -7,6 +7,8 @@
 #include <format>
 #include <iostream>
 #include <string>
+
+using namespace std::string_literals;
 
 using am::GitStats;
 using am::Stats;
@@ -46,6 +48,8 @@ static std::string getRemoteOrigin(git_repository* repo) {
 	return url;
 }
 
+static bool isUpToDate(git_repository* repo) { return false; /** \todo implement **/ }
+
 GitStats::GitStats() : repo(nullptr) {
 	git_libgit2_init();
 	int error = git_repository_open_ext(&repo, "./", 0, nullptr);
@@ -67,12 +71,13 @@ Stats GitStats::getStats() {
 	if (isRepository()) {
 		return {
 				{"git",
-				 {{"isrepo", {"1"}},
-				  {"tag", {getShortname(repo)}},
-				  {"last commit", {getLastCommitHash(repo)}},
-				  {"remote", {{{"origin", {getRemoteOrigin(repo)}}}}}}}
+				 {{"isrepo", "1"s},
+				  {"tag", getShortname(repo)},
+				  {"last commit", getLastCommitHash(repo)},
+				  {"remote", {{{"origin", getRemoteOrigin(repo)}}}},
+				  {"up to date", "TODO"s}}}
 		};
 	} else {
-		return {{"git", {{"isrepo", {"0"}}}}};
+		return {{"git", {{"isrepo", "0"s}}}};
 	}
 }

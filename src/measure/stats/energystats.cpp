@@ -1,4 +1,4 @@
-#include <measure/stats/energystats.hpp>
+#include "energystats.hpp"
 
 using am::EnergyStats;
 using am::Stats;

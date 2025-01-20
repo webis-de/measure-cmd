@@ -1,10 +1,12 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#include "formatters.hpp"
 #include "logging.hpp"
 
 #include <measureapi.h>
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -37,6 +39,14 @@ namespace am {
 		std::vector<std::string> statproviders;
 		mapiConfig measureConf;
 		bool pedantic;
+
+		const ResultFormatter& getFormatter() const {
+			static const std::map<std::string, ResultFormatter> formatters{
+					{"simple", simpleFormatter},
+					{"json", jsonFormatter},
+			};
+			return formatters.at(formatter);
+		}
 	};
 } // namespace am
 

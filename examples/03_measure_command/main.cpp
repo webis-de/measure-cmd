@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "formatters.hpp"
 #include "utils.hpp"
 
 #include <measureapi.h>
@@ -53,18 +54,12 @@ static void runMeasureCmd(const MeasureCmdArgs& args) {
 	auto exitcode = std::system(args.command.c_str());
 
 	// Stop measuring
-	char* result;
-	mapiStopMeasure(handle, &result);
-	std::cout << result << std::endl;
-	free(result);
+	auto result = mapiStopMeasure(handle);
 
-	// Collect statistics and print them
-	/*am::Stats stats{{"exit code", {std::to_string(exitcode)}}};
-	for (auto& provider : providers)
-		provider->getStats(stats);
-
+	/** \todo Maybe add the exit code as a stat. **/
 	std::cout << "\n== RESULTS ==" << std::endl;
-	std::cout << *args.constructFormatter(std::move(stats));*/
+	args.getFormatter()(std::cout, result);
+	mapiResultFree(result);
 }
 
 int main(int argc, char* argv[]) {

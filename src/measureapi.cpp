@@ -1,8 +1,7 @@
 #include <measureapi.h>
 
 #include "logging.hpp"
-#include <measure/statformatter.hpp>
-#include <measure/stats/provider.hpp>
+#include "measure/stats/provider.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -73,32 +72,26 @@ struct mapiMeasure_st final {
 mapiMeasure* mapiStartMeasure(mapiConfig config) { return new mapiMeasure{config}; }
 
 mapiResult* mapiStopMeasure(mapiMeasure* measure) {
-	/*auto str = measure->stop();
-	size_t memsize = str.length() + 1;
-	*result = static_cast<char*>(std::malloc(memsize)); // The caller has to free
-	assert(result != nullptr);
-	std::memcpy(static_cast<void*>(*result), static_cast<const void*>(str.c_str()), memsize);
-	delete measure;*/
 	auto result = measure->stop();
 	delete measure;
-	return (mapiResult*)new am::Stats(std::move(result));
+	return new am::Stats(std::move(result));
 }
 
 bool mapiResultGetValue(const mapiResult* result, void const** value) {
-	if (((am::Stats*)result)->isLeaf()) {
-		*value = reinterpret_cast<const void*>(((am::Stats*)result)->item().c_str());
+	if (value != nullptr && result->isLeaf()) {
+		*value = reinterpret_cast<const void*>(result->item().c_str());
 		return true;
 	}
-	return false;
+	return result->isLeaf();
 }
 
-size_t mapiResultGetChildren(const mapiResult* result, mapiResult const** buf, size_t bufsize) {
-	if (((am::Stats*)result)->isLeaf())
+size_t mapiResultGetEntries(const mapiResult* result, mapiResultEntry* buf, size_t bufsize) {
+	if (result->isLeaf())
 		return 0;
 	if (buf != nullptr)
-		for (const auto& child : ((am::Stats*)result)->children() | std::views::take(bufsize))
-			*buf = (mapiResult const*)&child.second;
-	return ((am::Stats*)result)->children().size();
+		for (const auto& child : result->children() | std::views::take(bufsize))
+			*(buf++) = {.name = child.first.c_str(), .value = &child.second};
+	return result->children().size();
 }
 
-void mapiResultFree(mapiResult* result) { delete (am::Stats*)result; }
+void mapiResultFree(mapiResult* result) { delete result; }

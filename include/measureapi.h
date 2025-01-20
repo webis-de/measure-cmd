@@ -115,6 +115,14 @@ typedef struct mapiMeasure_st mapiMeasure;
 typedef struct mapiResult_st mapiResult;
 
 /**
+ * @brief Holds a result entry, i.e., a key-value pair of a name (string) and a value (mapiResult).
+ */
+typedef struct mapiResultEntry_st {
+	const char* name;
+	const mapiResult* value;
+} mapiResultEntry;
+
+/**
  * @brief Initializes the providers set in the configuration and starts measuring.
  * 
  * @param config the configuration to use to measure
@@ -133,10 +141,45 @@ MA_EXPORT mapiMeasure* mapiStartMeasure(mapiConfig config);
  */
 MA_EXPORT mapiResult* mapiStopMeasure(mapiMeasure* measure);
 
+/**
+ * @brief Returns the value of \p result and returns true if \p result is a leaf and only returns false otherwise.
+ * @details This function may also be used only to check if \p result is a leaf by passing NULL to \p value :
+ * ```c
+ * bool isleaf = mapiResultGetValue(result, NULL);
+ * ```
+ * 
+ * @param result The result to get a value for.
+ * @param value A pointer to where a pointer to the value should be written to. If NULL, only the check if \p result is
+ * a leaf is performed.
+ * @return True if and only if the node in the result tree pointed to by \p result is a leaf. 
+ */
 MA_EXPORT bool mapiResultGetValue(const mapiResult* result, void const** value);
 
-MA_EXPORT size_t mapiResultGetChildren(const mapiResult* result, mapiResult const** buf, size_t bufsize);
+/**
+ * @brief Fetches the entries of \p result and writes them to \p buf if \p result is not a leaf. If \p result is a leaf,
+ * 0 is returned.
+ * @details If \p buf is \c NULL , \p bufsize is ignored and only the number of children are returned. A typical call
+ * may look as follows:
+ * ```c
+ * size_t num = mapiResultGetEntries(result, NULL, 0);
+ * mapiResultEntry* buf = (mapiResultEntry*)calloc(num, sizeof(mapiResultEntry));
+ * mapiResultGetEntries(result, buf, num);
+ * // ...
+ * free(buf);
+ * ```
+ * 
+ * @param result The result to return the entries for.
+ * @param buf The buffer to write the entries into. If \p buf is NULL, only the number of entries will be returned.
+ * @param bufsize The size of the buffer.
+ * @return The number of entries in \p result. 
+ */
+MA_EXPORT size_t mapiResultGetEntries(const mapiResult* result, mapiResultEntry* buf, size_t bufsize);
 
+/**
+ * @brief Frees the given result, its children, and all associated values.
+ * 
+ * @param result The result to be freed.
+ */
 MA_EXPORT void mapiResultFree(mapiResult* result);
 #ifdef __cplusplus
 }

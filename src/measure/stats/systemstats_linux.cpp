@@ -1,5 +1,5 @@
 #if __linux__
-#include <measure/stats/systemstats.hpp>
+#include "systemstats.hpp"
 
 #include <sys/resource.h>
 #include <sys/sysinfo.h>

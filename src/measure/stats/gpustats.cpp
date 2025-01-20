@@ -1,9 +1,11 @@
-#include <measure/stats/gpustats.hpp>
+#include "gpustats.hpp"
 
 #include "../../logging.hpp"
 #include "../utils/sharedlib.hpp"
 
 #include <nvml/nvml.h>
+
+using namespace std::literals;
 
 using am::GPUStats;
 using am::Stats;
@@ -158,10 +160,10 @@ Stats GPUStats::getStats() {
 			}
 		}
 
-		return {{"gpu", {{"supported", {"1"}}, {"VRAM (MB)", {vramTotal}}}},
-				{"system", {{"Max VRAM Used (MB)", {std::to_string(nvml.vramUsageTotal.maxValue())}}}}};
+		return {{"gpu", {{"supported", "1"s}, {"VRAM (MB)", vramTotal}}},
+				{"system", {{"Max VRAM Used (MB)", std::to_string(nvml.vramUsageTotal.maxValue())}}}};
 		/** \todo implement **/
 	} else {
-		return {{"gpu", {{"supported", {"0"}}}}};
+		return {{"gpu", {{"supported", "0"s}}}};
 	}
 }

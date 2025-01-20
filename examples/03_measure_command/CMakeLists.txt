@@ -1,6 +1,7 @@
 
 add_executable(measure
     main.cpp
+    formatters.cpp
     logging.cpp
 )
 

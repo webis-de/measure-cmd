@@ -1,11 +1,11 @@
-#include <measure/stats/provider.hpp>
+#include "provider.hpp"
 
 #include "../../logging.hpp"
 
-#include <measure/stats/energystats.hpp>
-#include <measure/stats/gitstats.hpp>
-#include <measure/stats/gpustats.hpp>
-#include <measure/stats/systemstats.hpp>
+#include "energystats.hpp"
+#include "gitstats.hpp"
+#include "gpustats.hpp"
+#include "systemstats.hpp"
 
 using am::StatsProvider;
 
