@@ -76,8 +76,8 @@ Timeseries datatypes are denoted `T...`, where `T` is the datatype of each entry
 | `git` &gt; `tag`                       | String    | Retrieves the tag or branch name that is checked out                                                 | Implemented |
 | `git` &gt; `last commit`               | String    | Holds the hash identifying the latest commit                                                         | Implemented |
 | `git` &gt; `remote` &gt; `origin`      | String    | Contains the URL to the `origin` remote if such a remote exists                                      | Implemented |
-| `git` &gt; `up to date`                | Boolean   | True if no changes to files in the repository are uncommitted                                        | Planned     |
-| `git` &gt; `unchecked files`           | Boolean   | True if files exist that are not ignored by the `.gitignore` and are not checked into the repository | Planned     |
+| `git` &gt; `up to date`                | Boolean   | True if no changes to files in the repository are uncommitted                                        | Implemented |
+| `git` &gt; `untracked files`           | Boolean   | True if files exist that are not ignored by the `.gitignore` and are not checked into the repository | Implemented |
 | `git` &gt; `hash`                      | String    | The hash of all files checked into the repository                                                    | Planned     |
 
 ## System
