@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <threads.h>
 
 void logcallback(mapiLogLevel level, const char* component, const char* message) {
 	static const char* levlToStr[] = {[TRACE] = "TRACE", [DEBUG] = "DEBUG", [INFO] = "INFO",
@@ -33,18 +34,27 @@ void printResult(const mapiResult* result, const char* prefix) {
 	}
 }
 
+int fib(int n) {
+	if (n <= 1)
+		return n;
+	return fib(n - 1) + fib(n - 2);
+}
+
 int main(int argc, char* argv[]) {
 	mapiSetLogCallback(logcallback);
 
 	const char* provider[] = {"git", "system", "gpu", "energy", NULL};
-	mapiConfig config = {.provider = provider, .monitor = true, .pollIntervallMs = 1000};
+	mapiConfig config = {.provider = provider, .monitor = true, .pollIntervallMs = 100};
 
 	mapiMeasure* measure = mapiStartMeasure(config);
 
 	{
-		char* data = calloc(24 * 1000 * 1000, 1); // allocate 24 MB
-		data[0] = 1;							  // Access the data so it is not optimized away
-		free(data);
+		/*char* data = calloc(24 * 1000 * 1000, 1);	  // allocate 24 MB
+		for (size_t i = 0; i < 24 * 1000 * 1000; ++i) // Access the data so it is not optimized away
+			data[i] = 1;
+		thrd_sleep(&(struct timespec){.tv_sec = 1}, NULL);
+		free(data);*/
+		fib(45);
 	}
 
 	mapiResult* result = mapiStopMeasure(measure);

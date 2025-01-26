@@ -51,14 +51,15 @@ to measure everything, you may want to know about the shell command `<command>`.
 
 int main(int argc, char* argv[]) {
     const char* provider[] = {"git", "system", "gpu", "energy", NULL};
-    char* outputJson;
-    mapiConfig config = {.provider = provider, .monitor = true, .pollIntervallMs = 1000};
+    mapiConfig config = {.provider = provider, .monitor = true, .pollIntervallMs = 100};
 
     mapiMeasure* measure = mapiStartMeasure(config);
     /** Measure your code here **/
 
-    mapiStopMeasure(handle, &outputJson);
-    /** The collected data is serialized into outputJson and needs to be freed by the caller **/
+    mapiResult* result = mapiStopMeasure(measure);
+    /** The collected data can be traversed here **/
+    
+    mapiResultFree(result);
 }
 ```
 
@@ -89,11 +90,11 @@ Timeseries datatypes are denoted `T...`, where `T` is the datatype of each entry
 | `elapsed time` &gt; `system (ms)`      | Float     | The total time the program spent in system mode                                                      | Implemented |
 | `resources` &gt; `RAM Used (KB)`       | UInt...   | The time series of RAM utilization                                                                   | Implemented |
 | `resources` &gt; `Max RAM Used (KB)`   | UInt      | The most amount of RAM the program used at any one point                                             | Implemented |
-| `resources` &gt; `CPU Utilization (%)` | UInt...   | The time series of **process'** CPU utilization of the                                               | Planned     |
+| `resources` &gt; `CPU Utilization (%)` | UInt8...  | The time series of **process'** CPU utilization of the                                               | Planned     |
 | `system` &gt; `num cores`              | UInt      | The total number of CPU cores installed in the system                                                | Implemented |
 | `system` &gt; `RAM (MB)`               | UInt      | The total amount of RAM installed in the system                                                      | Implemented |
 | `system` &gt; `RAM Used (MB)`          | UInt...   | The time series of entire **system's** RAM utilization                                               | Planned     |
-| `system` &gt; `CPU Utilization (%)`    | Float...  | The time series of entire **system's** CPU utilization                                               | Planned     |
+| `system` &gt; `CPU Utilization (%)`    | UInt8...  | The time series of entire **system's** CPU utilization                                               | Planned     |
 
 ## Energy
 
@@ -109,8 +110,8 @@ Timeseries datatypes are denoted `T...`, where `T` is the datatype of each entry
 |--------------------------------------------|-----------|------------------------------------------------------------------------------------------------------|-------------|
 | `resources` &gt; `VRAM Used (MB)`          | [UInt]... |                                                                                                      | Planned     |
 | `resources` &gt; `Max VRAM Used (MB)`      | [UInt]    |                                                                                                      | Planned     |
-| `resources` &gt; `GPU Utilization (%)`     | [Float]...|                                                                                                      | Planned     |
-| `resources` &gt; `Max GPU Utilization (%)` | [Float]   |                                                                                                      | Planned     |
+| `resources` &gt; `GPU Utilization (%)`     | [UInt8]...|                                                                                                      | Planned     |
+| `resources` &gt; `Max GPU Utilization (%)` | [UInt8]   |                                                                                                      | Planned     |
 | `system` &gt; `VRAM (MB)`                  | [UInt]    |                                                                                                      | Implemented |
 | `system` &gt; `Max VRAM Used (MB)`         | [UInt]    |                                                                                                      | Implemented |
 | `system` &gt; `VRAM Used (MB)`             | [UInt]... |                                                                                                      | Planned     |

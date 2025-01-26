@@ -1,6 +1,7 @@
 #ifndef STATS_SYSTEMSTATS_HPP
 #define STATS_SYSTEMSTATS_HPP
 
+#include "../measure.hpp"
 #include "provider.hpp"
 
 #include <chrono>
@@ -12,10 +13,22 @@ namespace am {
 		std::chrono::steady_clock::time_point starttime;
 		std::chrono::steady_clock::time_point stoptime;
 
-		unsigned maxRAM;
+		am::TimeSeries<unsigned> ram;
+		am::TimeSeries<unsigned> sysCpuUtil;
+		am::TimeSeries<unsigned> sysRam;
 
-		struct Entry;
-		std::vector<Entry> monitored;
+#if __linux__
+		struct Utilization;
+
+		size_t lastIdle;
+		size_t lastTotal;
+
+		Utilization getUtilization();
+		void parseMemInfo(Utilization& utilization);
+		void parseStat(Utilization& utilization);
+		void parseStatm(pid_t pid, Utilization& utilization);
+		void parseStat(pid_t pid, Utilization& utilization);
+#endif
 
 	public:
 		void start() override;
@@ -25,12 +38,6 @@ namespace am {
 
 		static constexpr const char* description = "Collects system components and utilization metrics.";
 		static const char* version;
-
-	private:
-		struct Entry {
-			int64_t timestamp;
-			unsigned usedRAM;
-		};
 	};
 } // namespace am
 
