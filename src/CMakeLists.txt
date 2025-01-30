@@ -30,6 +30,10 @@ add_library(measureapi_static STATIC
 target_compile_features(measureapi_static PUBLIC cxx_std_20)
 target_include_directories(measureapi_static PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../include)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_link_options(measureapi PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
 
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
