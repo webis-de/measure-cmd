@@ -1,5 +1,11 @@
 # The Measure Python API
 
+Install via:
+
+```
+pip3 install 'git+https://github.com/tira-io/measure.git@python-language-structure#egg=py_measure&subdirectory=python'
+```
+
 ```py
 from py_measure import Environment
 
