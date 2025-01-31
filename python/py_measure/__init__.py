@@ -60,12 +60,11 @@ class Environment():
         self.libmeasureapi.mapiStopMeasure.argtypes = [ctypes.c_void_p]
         self.libmeasureapi.mapiStopMeasure.restype = ctypes.c_void_p
         self.libmeasureapi.mapiSetLogCallback.argtypes = [ctypes.c_void_p]
-        self.libmeasureapi.mapiResultGetValue.argtypes = [ctypes.c_void_p, ctypes.POINTER[ctypes.c_void_p]]
+        self.libmeasureapi.mapiResultGetValue.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
         self.libmeasureapi.mapiResultGetValue.restype = ctypes.c_bool
         self.libmeasureapi.mapiResultGetEntries.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
         self.mapiResultGetEntries.restype = ctypes.c_size_t
         self.libmeasureapi.mapiResultFree.argtypes = [ctypes.c_void_p]
-
 
         self.handle = None
         self.providers = self.allowed_providers(providers)
