@@ -118,10 +118,15 @@ void SystemStats::parseStat(Utilization& utilization) {
 	is >> cpu >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guestnice;
 
 	auto total = user + nice + system + idle + iowait + irq + softirq + steal + guest + guestnice;
-	utilization.system.cpuUtilization = 100 - (((idle - lastIdle) * 100) / (total - lastTotal));
+	if (total - lastTotal == 0) {
+		// Not enough time has passed
+		utilization.system.cpuUtilization = 100;
+	} else {
+		utilization.system.cpuUtilization = 100 - (((idle - lastIdle) * 100) / (total - lastTotal));
 
-	lastIdle = idle;
-	lastTotal = total;
+		lastIdle = idle;
+		lastTotal = total;
+	}
 }
 
 void SystemStats::parseStatm(pid_t pid, Utilization& utilization) {

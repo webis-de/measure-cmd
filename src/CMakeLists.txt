@@ -34,6 +34,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_link_options(measureapi PRIVATE -static-libgcc -static-libstdc++)
 endif()
 
+target_link_libraries(measureapi PUBLIC dl)  # dlopen, dlclose, ...
+
 
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

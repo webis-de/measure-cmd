@@ -9,7 +9,7 @@ USER root
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 apt-get update
-apt-get -y install g++-12 cmake git
+apt-get -y install clang-18 cmake git
 
 # Needed for the dev environment
 apt-get -y install build-essential cppcheck flawfinder doxygen graphviz gdb clang-tidy clang-format
