@@ -37,6 +37,14 @@ if __name__ == "__main__":
     # Step 1: Load the shard object (YOUR PATH MAY BE DIFFERENT!)
     libmeasureapi = ctypes.cdll.LoadLibrary("build/src/libmeasureapi.so")
 
+    ## Tell ctypes the datatypes of the respective functons
+    ## NOTE: leaving this out has caused issues with downcasted addresses for the handle in the past.
+    libmeasureapi.mapiStartMeasure.argtypes = [MapiConfig]
+    libmeasureapi.mapiStartMeasure.restype = ctypes.c_void_p
+
+    libmeasureapi.mapiStopMeasure.argtypes = [ctypes.c_void_p]
+    libmeasureapi.mapiStopMeasure.restype = ctypes.c_void_p
+
     # (Optional): Register logger
     libmeasureapi.mapiSetLogCallback(log_callback)
 
