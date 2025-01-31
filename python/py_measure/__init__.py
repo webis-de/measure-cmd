@@ -40,7 +40,7 @@ def result_to_dict(lib, result: ctypes.POINTER(None)) -> "str | dict":
     """
     value = ctypes.c_void_p()
     if (lib.mapiResultGetValue(result, ctypes.pointer(value))):
-        return value.value.decode('ascii')
+        return ctypes.cast(value, ctypes.c_char_p).value.decode('ascii')
     else:
         num = lib.mapiResultGetEntries(result, None, 0)
         buf = (MapiResultEntry*num)()
