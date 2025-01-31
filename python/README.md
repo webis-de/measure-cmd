@@ -6,6 +6,8 @@ Install via:
 pip3 install 'git+https://github.com/tira-io/measure.git@python-language-structure#egg=py_measure&subdirectory=python'
 ```
 
+Usage:
+
 ```py
 from py_measure import Environment
 
@@ -27,4 +29,11 @@ environment.start_measuring()
 environment.stop_measuring()
 
 print("start git hash", environment.measurements[0]["git"])
+```
+
+
+
+Run tests via:
+```
+pytest
 ```
