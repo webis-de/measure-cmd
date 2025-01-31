@@ -38,7 +38,7 @@ def result_to_dict(lib, result: ctypes.POINTER(None)) -> "str | dict":
     """
     Takes a reference to the library and a pointer to a results object and recursively translates it into a python object.
     """
-    value = ctypes.c_char_p()
+    value = ctypes.c_void_p()
     if (lib.mapiResultGetValue(result, ctypes.pointer(value))):
         return value.value.decode('ascii')
     else:
