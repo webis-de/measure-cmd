@@ -62,6 +62,8 @@ namespace am {
 
 	class StatsProvider {
 	public:
+		virtual ~StatsProvider() = default;
+
 		/**
 		 * @brief Start is called once at the very beginning of collecting statistics and shortly before the command is
 		 * run.
