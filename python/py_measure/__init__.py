@@ -52,6 +52,14 @@ ALLOWED_PROVIDERS = ("git", "system", "energy", "gpu")
 class Environment():
     def __init__(self, providers=ALLOWED_PROVIDERS, verbose=False):
         self.libmeasureapi = ctypes.cdll.LoadLibrary(path_to_libmeasureapi())
+
+        ## Tell ctypes the datatypes of the respective functons
+        ## NOTE: leaving this out has caused issues with downcasted addresses for the handle in the past.
+        self.libmeasureapi.mapiStartMeasure.argtypes = [MapiConfig]
+        self.libmeasureapi.mapiStartMeasure.restype = ctypes.c_void_p
+        self.libmeasureapi.mapiStopMeasure.argtypes = [ctypes.c_void_p]
+        self.libmeasureapi.mapiStopMeasure.restype = ctypes.c_void_p
+
         self.handle = None
         self.providers = self.allowed_providers(providers)
         self.measurements = []
